@@ -51,6 +51,7 @@ const main = async () => {
   //
   //
   //
+  //
   // auto deploy to read contract directory and deploy them all (add ".args" files for arguments)
   //await autoDeploy();
   // OR
