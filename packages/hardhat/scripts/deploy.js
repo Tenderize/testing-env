@@ -5,12 +5,19 @@ const { config, ethers } = require("hardhat");
 const { utils } = require("ethers");
 const R = require("ramda");
 
+
 const main = async () => {
 
   console.log("\n\n 📡 Deploying...\n");
 
+  // var privateKey = "0x0123456789012345678901234567890123456789012345678901234567890123";
+  // var wallet = new Wallet(privateKey);
 
-  const yourContract = await deploy("YourContract") // <-- add in constructor args like line 16 vvvv
+  // console.log("Address: " + wallet.address);
+  // // "Address: 0x14791697260E4c9A71f18484C9f997B308e59325"
+
+
+  //const yourContract = await deploy("YourContract") // <-- add in constructor args like line 16 vvvv
 
 
 
@@ -28,16 +35,65 @@ const main = async () => {
   */
 
 
-  /*
+  
 
   //If you want to send value to an address from the deployer
 
   const deployerWallet = ethers.provider.getSigner()
-  await deployerWallet.sendTransaction({
-    to: "0x34aA3F359A9D614239015126635CE7732c18fDF3",
-    value: ethers.utils.parseEther("0.001")
-  })
-  */
+  // await deployerWallet.sendTransaction({
+  //   to: "0x31D7326c1347239262C98bccFE13e9e5FD4E7357",
+  //   value: ethers.utils.parseEther("1")
+  // })
+  console.log(deployerWallet.address)
+
+  //
+  //
+  //
+  //
+  //
+  // auto deploy to read contract directory and deploy them all (add ".args" files for arguments)
+  //await autoDeploy();
+  // OR
+  // custom deploy (to use deployed addresses dynamically for example:)
+  //const exampleToken = await deploy("ExampleToken")
+  //const examplePriceOracle = await deploy("ExamplePriceOracle")
+  //const smartContractWallet = await deploy("SmartContractWallet",[exampleToken.address,examplePriceOracle.address])
+  //const [adminSigner] = await ethers.getAddress
+  //admin = await adminSigner.getAddress();
+  //console.log(account);
+  const token = await deploy("Balloons")
+  const tender = await deploy("Cats")
+  const dex = await deploy("DEX",[token.address, tender.address])
+  const manager = await deploy("Manager", [token.address, tender.address, dex.address])
+  const staker = await deploy("Staker")
+  // const manager = await deploy("Manager",[token.address])
+
+  //[addr1, addr2, addr3, addr4, _] = await ethers.getSigners()
+    // Get the address of the Signer
+  const myAddress = "0x31D7326c1347239262C98bccFE13e9e5FD4E7357"
+  // '0x8ba1f109551bD432803012645Ac136ddd64DBA72'
+
+  // paste in your address here to get 10 token on deploy:
+  await token.transfer(myAddress,""+(104*10**18))
+  await tender.transfer(myAddress,""+(204*10**18))
+
+  // uncomment to init DEX on deploy:
+  console.log("Approving DEX ("+dex.address+") to take token from main account...")
+  await token.approve(dex.address,ethers.utils.parseEther('100'))
+  await tender.approve(dex.address,ethers.utils.parseEther('100'))
+  await token.approve(dex.address,ethers.utils.parseEther('100'))
+  await tender.approve(dex.address,ethers.utils.parseEther('100'))
+  await tender.approve(manager.address,ethers.utils.parseEther('100'))
+  console.log("INIT exchange...")
+  await dex.init(ethers.utils.parseEther('5')) // dex.init(ethers.utils.parseEther('5'),{value:ethers.utils.parseEther('5')}) 
+
+  // contract interactions
+  const spotPrice = await manager.sharePrice()
+  console.log("SpotPrice:", ethers.utils.formatEther(spotPrice))
+  // await manager.deposit(ethers.utils.parseEther('1'))
+  // await manager.withdraw(ethers.utils.parseEther('1'))
+
+
 
 
   console.log(

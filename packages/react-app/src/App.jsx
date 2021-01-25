@@ -154,6 +154,8 @@ function App(props) {
       {/* ✏️ Edit the header and change the title to your project name */}
       <Header />
 
+      
+
       <BrowserRouter>
 
         <Menu style={{ textAlign:"center" }} selectedKeys={[route]} mode="horizontal">
@@ -171,6 +173,8 @@ function App(props) {
           </Menu.Item>
         </Menu>
 
+        
+
         <Switch>
           <Route exact path="/">
             {/*
@@ -178,6 +182,16 @@ function App(props) {
                 this <Contract/> component will automatically parse your ABI
                 and give you a form to interact with it locally
             */}
+            
+
+            <Contract
+              name="Manager"
+              signer={userProvider.getSigner()}
+              provider={localProvider}
+              address={address}
+              blockExplorer={blockExplorer}
+            />
+
             <Contract
               name="YourContract"
               signer={userProvider.getSigner()}
@@ -186,6 +200,29 @@ function App(props) {
               blockExplorer={blockExplorer}
             />
 
+            <Contract
+              name="Balloons"
+              signer={userProvider.getSigner()}
+              provider={localProvider}
+              address={address}
+              blockExplorer={blockExplorer}
+            />
+
+            <Contract
+              name="Cats"
+              signer={userProvider.getSigner()}
+              provider={localProvider}
+              address={address}
+              blockExplorer={blockExplorer}
+            />
+            
+            <Contract
+              name="DEX"
+              signer={userProvider.getSigner()}
+              provider={localProvider}
+              address={address}
+              blockExplorer={blockExplorer}
+            />
             { /* Uncomment to display and interact with an external contract (DAI on mainnet):
             <Contract
               name="DAI"
