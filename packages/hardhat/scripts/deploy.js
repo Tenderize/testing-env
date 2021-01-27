@@ -6,6 +6,8 @@ const { utils } = require("ethers");
 const R = require("ramda");
 
 
+
+
 const main = async () => {
 
   console.log("\n\n 📡 Deploying...\n");
@@ -39,12 +41,12 @@ const main = async () => {
 
   //If you want to send value to an address from the deployer
 
-  const deployerWallet = ethers.provider.getSigner()
+  //const deployerWallet = ethers.provider.getSigner()
   // await deployerWallet.sendTransaction({
   //   to: "0x31D7326c1347239262C98bccFE13e9e5FD4E7357",
   //   value: ethers.utils.parseEther("1")
   // })
-  console.log(deployerWallet.address)
+  //console.log(deployerWallet.address)
 
   //
   //
@@ -54,7 +56,7 @@ const main = async () => {
   //
   // auto deploy to read contract directory and deploy them all (add ".args" files for arguments)
   //await autoDeploy();
-  // OR
+  // OR   aasas
   // custom deploy (to use deployed addresses dynamically for example:)
   //const exampleToken = await deploy("ExampleToken")
   //const examplePriceOracle = await deploy("ExamplePriceOracle")
@@ -62,6 +64,9 @@ const main = async () => {
   //const [adminSigner] = await ethers.getAddress
   //admin = await adminSigner.getAddress();
   //console.log(account);
+  const [owner, account1, account2, ] = await ethers.getSigners()
+  console.log("account of owner + account addresses: ", owner.address, account1.address, account2.address)
+
   const token = await deploy("Balloons")
   const tender = await deploy("Cats")
   const dex = await deploy("DEX",[token.address, tender.address])
@@ -77,22 +82,50 @@ const main = async () => {
   // paste in your address here to get 10 token on deploy:
   await token.transfer(myAddress,""+(104*10**18))
   await tender.transfer(myAddress,""+(204*10**18))
+  await token.transfer(account1.address,""+(104*10**18))
+  await tender.transfer(account1.address,""+(304*10**18))
 
   // uncomment to init DEX on deploy:
   console.log("Approving DEX ("+dex.address+") to take token from main account...")
   await token.approve(dex.address,ethers.utils.parseEther('100'))
   await tender.approve(dex.address,ethers.utils.parseEther('100'))
-  await token.approve(dex.address,ethers.utils.parseEther('100'))
-  await tender.approve(dex.address,ethers.utils.parseEther('100'))
-  await tender.approve(manager.address,ethers.utils.parseEther('100'))
   console.log("INIT exchange...")
   await dex.init(ethers.utils.parseEther('5')) // dex.init(ethers.utils.parseEther('5'),{value:ethers.utils.parseEther('5')}) 
 
-  // contract interactions
+
+
+  console.log("Approving Manger ("+manager.address+") + depositing from account1...")
+  await token.connect(account1).approve(manager.address, ethers.utils.parseEther('100'))
+  // await manager.connect(account1).deposit(ethers.utils.parseEther('1'))
+
+  // await tender.approve(dex.address,ethers.utils.parseEther('100'))
+  // await tender.approve(manager.address,ethers.utils.parseEther('100')) // ,{from:myAddress} WE NEED to do This 
+  // await manager.deposit(ethers.utils.parseEther('10'))
+  
+  // testing contract interactions
   const spotPrice = await manager.sharePrice()
   console.log("SpotPrice:", ethers.utils.formatEther(spotPrice))
+
+
   // await manager.deposit(ethers.utils.parseEther('1'))
   // await manager.withdraw(ethers.utils.parseEther('1'))
+  // {from:myAdress}
+
+
+  console.log("-------------------ALLL DONE------------------")
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

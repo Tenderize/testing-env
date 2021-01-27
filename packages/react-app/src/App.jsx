@@ -192,6 +192,8 @@ function App(props) {
               blockExplorer={blockExplorer}
             />
 
+            
+
             <Contract
               name="YourContract"
               signer={userProvider.getSigner()}

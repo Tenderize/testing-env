@@ -12,7 +12,7 @@ import "./Staker.sol";
 import "./Token/ITenderToken.sol";
 
 // external imports
-import "@openzeppelin/contracts/access/Ownable.sol";
+// import "@openzeppelin/contracts/access/Ownable.sol";
 
 // interfaces 
 
@@ -69,14 +69,14 @@ contract Manager {
         return outstanding.mul(1e18).div(tenderSupply);
     }
 
-    function deposit(uint256 _amount) public virtual  {
+    function deposit(uint256 _amount) public  {
         // Calculate share price
-        uint256 sharePrice = sharePrice();
+        uint256 currentSharePrice = sharePrice();
         uint256 shares;
 
-        if(sharePrice == 0) {
+        if(currentSharePrice == 0) {
             shares = _amount;
-        } else {_amount.mul(1e18).div(sharePrice);
+        } else {_amount.mul(1e18).div(currentSharePrice);
             }
 
         // Mint tenderToken
@@ -92,7 +92,7 @@ contract Manager {
         uint256 poolPrice = pool.getSpotPrice();
 
         // if pool price is more than 10% off the peg trade into pool
-        if (poolPrice.mul(110).div(100) < sharePrice) {
+        if (poolPrice.mul(110).div(100) < currentSharePrice) {
             pool.tokenToTender(_amount);
 
             // uint256 tokenIn = balancerCalcInGivenPrice(_token, _tenderToken, sharePrice, spotPrice);
