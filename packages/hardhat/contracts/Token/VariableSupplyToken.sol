@@ -1,4 +1,4 @@
-pragma solidity ^0.6.2;
+pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -25,7 +25,7 @@ contract VariableSupplyToken is ERC20, Ownable {
      * @dev Burns a specific amount of the sender's tokens
      * @param _amount The amount of tokens to be burned
      */
-    function burn(uint256 _amount) public {
+    function burn(uint256 _amount) public onlyOwner {
         _burn(msg.sender, _amount);
         emit Burn(msg.sender, _amount);
     }

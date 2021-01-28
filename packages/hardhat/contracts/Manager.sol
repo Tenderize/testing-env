@@ -1,4 +1,4 @@
-pragma solidity ^0.6.2;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 // libraries
@@ -54,12 +54,13 @@ contract Manager {
     // Balancer Pool needs to be created in constructor because we can not add liquidity for both tokens otherwise
     // Will have to approve _token before calling init and in init call _token.transferFrom then mint the same amount of tenderToken
     // And add both to the pool
-    constructor (address _underlyingToken_addr, address _tenderToken_addr, address _pool_addr) public {
+    constructor (address _underlyingToken_addr, address _tenderToken_addr, address _pool_addr, address _staker_addr) public {
         underlyingToken = IERC20(_underlyingToken_addr);
         tenderToken = ITenderToken(_tenderToken_addr);
         pool = DEX(_pool_addr);
-        underlyingToken.approve(address(pool), MAX);
-        tenderToken.approve(address(pool), MAX);
+        staker = Staker(_staker_addr);
+        // underlyingToken.approve(address(pool), MAX);
+        // tenderToken.approve(address(pool), MAX);
         }
 
     function sharePrice() public view returns (uint256) {
@@ -69,6 +70,9 @@ contract Manager {
         return outstanding.mul(1e18).div(tenderSupply);
     }
 
+    function mintTender(uint256 _amount) public {
+        tenderToken.mint(msg.sender, _amount);
+    }
     function deposit(uint256 _amount) public  {
         // Calculate share price
         uint256 currentSharePrice = sharePrice();
@@ -104,7 +108,8 @@ contract Manager {
             // // burn the derivative amount we bought up 
             // tenderToken.burn(out);
             // _amount  = _amount.sub(tokenIn);
-        } else {
+        } 
+        else {
             staker._stake(_amount);
 
         }

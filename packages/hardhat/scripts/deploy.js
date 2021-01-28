@@ -68,11 +68,15 @@ const main = async () => {
   console.log("account of owner + account addresses: ", owner.address, account1.address, account2.address)
 
   const token = await deploy("Balloons")
-  const tender = await deploy("Cats")
+  const tender = await deploy("TenderToken", ["tenter", "t"])
   const dex = await deploy("DEX",[token.address, tender.address])
-  const manager = await deploy("Manager", [token.address, tender.address, dex.address])
   const staker = await deploy("Staker")
-  // const manager = await deploy("Manager",[token.address])
+  const manager = await deploy("Manager", [token.address, tender.address, dex.address, staker.address])
+
+  // minting tender + giving minting privilages to Manager
+  await tender.mint(owner.address, ethers.utils.parseEther('10000'))
+  await tender.transferOwnership(manager.address)
+
 
   //[addr1, addr2, addr3, addr4, _] = await ethers.getSigners()
     // Get the address of the Signer
@@ -97,6 +101,13 @@ const main = async () => {
   console.log("Approving Manger ("+manager.address+") + depositing from account1...")
   await token.connect(account1).approve(manager.address, ethers.utils.parseEther('100'))
   // await manager.connect(account1).deposit(ethers.utils.parseEther('1'))
+
+  console.log("mintTender...")
+  await manager.mintTender(ethers.utils.parseEther('1'))
+
+  console.log("Depositing...")
+  await tender.connect(account1).approve(manager.address,ethers.utils.parseEther('100'))
+  await manager.connect(account1).deposit(ethers.utils.parseEther('1'))
 
   // await tender.approve(dex.address,ethers.utils.parseEther('100'))
   // await tender.approve(manager.address,ethers.utils.parseEther('100')) // ,{from:myAddress} WE NEED to do This 
