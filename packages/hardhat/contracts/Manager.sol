@@ -27,10 +27,10 @@ import "./Token/ITenderToken.sol";
 contract Manager {
     using SafeMath for uint256;
 
-    uint256 internal constant ONE = 1e18;
+   uint256 internal constant ONE = 1e18;
     uint256 internal constant MAX = 2**256-1;
     uint256 internal constant MIN = 1; 
-    uint256 internal constant liquidityPercentage = 1e17;
+    uint256 internal constant liquidityPercentage = 1e17; 
 
    
     // Tokens
@@ -38,14 +38,10 @@ contract Manager {
     IERC20 public underlyingToken;
     // Derivative
     ITenderToken public tenderToken;
-
     Staker public staker;
 
     // Swap
     DEX public pool; 
-    address public poolAddress;
-    address public tenderTokenAddress;
-    address public underlyingTokenAddress;
 
     uint256 public mintedForPool;
 
@@ -59,14 +55,15 @@ contract Manager {
         tenderToken = ITenderToken(_tenderToken_addr);
         pool = DEX(_pool_addr);
         staker = Staker(_staker_addr);
+        underlyingToken.approve(address(staker), MAX);
         // underlyingToken.approve(address(pool), MAX);
         // tenderToken.approve(address(pool), MAX);
         }
 
     function sharePrice() public view returns (uint256) {
-        uint256 tenderSupply = tenderToken.totalSupply().sub(tenderToken.balanceOf(address(pool))).add(mintedForPool);
-        uint256 outstanding = underlyingToken.balanceOf(address(this));
-        if (tenderSupply ==  0 ) { return 1e18; }
+        uint256 tenderSupply = tenderToken.totalSupply().sub(mintedForPool);
+        uint256 outstanding = underlyingToken.balanceOf(address(this)).add(underlyingToken.balanceOf(address(staker))).add(underlyingToken.balanceOf(address(pool)));
+        if (tenderSupply ==  0 || outstanding == 0 ) { return 0; }
         return outstanding.mul(1e18).div(tenderSupply);
     }
 
@@ -89,30 +86,33 @@ contract Manager {
          // Transfer LPT to Staker
         require(underlyingToken.transferFrom(msg.sender, address(this), _amount), "ERR_TOKEN_TANSFERFROM");
 
+        // Stake deposited amount
+        staker._stake(_amount);
+
         // Check if we need to do arbitrage if spotprice is at least 10% below shareprice
         // TODO: use proper maths (MathUtils)
         // address _token = address(underlyingToken);
         // address _tenderToken = address(tenderToken);
-        uint256 poolPrice = pool.getSpotPrice();
+        // uint256 poolPrice = pool.getSpotPrice();
 
         // if pool price is more than 10% off the peg trade into pool
-        if (poolPrice.mul(110).div(100) < currentSharePrice) {
-            pool.tokenToTender(_amount);
+        // if (poolPrice.mul(110).div(100) < currentSharePrice) {
+        //     pool.tokenToTender(_amount);
 
-            // uint256 tokenIn = balancerCalcInGivenPrice(_token, _tenderToken, sharePrice, spotPrice);
-            // if (tokenIn > _amount) {
-            //     tokenIn = _amount;
-            // }
-            // token.approve(address(balancer.pool), tokenIn);
-            // (uint256 out,) = balancer.pool.swapExactAmountIn(_token, tokenIn, _tenderToken, MIN, MAX);
-            // // burn the derivative amount we bought up 
-            // tenderToken.burn(out);
-            // _amount  = _amount.sub(tokenIn);
-        } 
-        else {
-            staker._stake(_amount);
+        //     // uint256 tokenIn = balancerCalcInGivenPrice(_token, _tenderToken, sharePrice, spotPrice);
+        //     // if (tokenIn > _amount) {
+        //     //     tokenIn = _amount;
+        //     // }
+        //     // token.approve(address(balancer.pool), tokenIn);
+        //     // (uint256 out,) = balancer.pool.swapExactAmountIn(_token, tokenIn, _tenderToken, MIN, MAX);
+        //     // // burn the derivative amount we bought up 
+        //     // tenderToken.burn(out);
+        //     // _amount  = _amount.sub(tokenIn);
+        // } 
+        // else {
+        //     staker._stake(_amount);
 
-        }
+        // }
 
         // TODO: require proper minimum boundary
         // if (_amount <= 1) { return; }

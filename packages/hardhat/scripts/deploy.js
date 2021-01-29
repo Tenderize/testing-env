@@ -70,12 +70,15 @@ const main = async () => {
   const token = await deploy("Balloons")
   const tender = await deploy("TenderToken", ["tenter", "t"])
   const dex = await deploy("DEX",[token.address, tender.address])
-  const staker = await deploy("Staker")
+  const staker = await deploy("Staker", [token.address, tender.address, dex.address])
   const manager = await deploy("Manager", [token.address, tender.address, dex.address, staker.address])
 
   // minting tender + giving minting privilages to Manager
   await tender.mint(owner.address, ethers.utils.parseEther('10000'))
   await tender.transferOwnership(manager.address)
+
+  // familiraze staker with manager
+  await staker.initManager(manager.address)
 
 
   //[addr1, addr2, addr3, addr4, _] = await ethers.getSigners()
@@ -86,6 +89,7 @@ const main = async () => {
   // paste in your address here to get 10 token on deploy:
   await token.transfer(myAddress,""+(104*10**18))
   await tender.transfer(myAddress,""+(204*10**18))
+  await tender.approve(staker.address,ethers.utils.parseEther('100'))
   await token.transfer(account1.address,""+(104*10**18))
   await tender.transfer(account1.address,""+(304*10**18))
 
@@ -107,7 +111,7 @@ const main = async () => {
 
   console.log("Depositing...")
   await tender.connect(account1).approve(manager.address,ethers.utils.parseEther('100'))
-  await manager.connect(account1).deposit(ethers.utils.parseEther('1'))
+  await manager.connect(account1).deposit(ethers.utils.parseEther('100'))
 
   // await tender.approve(dex.address,ethers.utils.parseEther('100'))
   // await tender.approve(manager.address,ethers.utils.parseEther('100')) // ,{from:myAddress} WE NEED to do This 
@@ -115,7 +119,11 @@ const main = async () => {
   
   // testing contract interactions
   const spotPrice = await manager.sharePrice()
-  console.log("SpotPrice:", ethers.utils.formatEther(spotPrice))
+  const tokenSupply = await token.balanceOf(staker.address)
+  const tenderSupply = await tender.totalSupply()
+  console.log("Token supply: ", ethers.utils.formatEther(tokenSupply))
+  console.log("Tender supply: ", ethers.utils.formatEther(tenderSupply))
+  console.log("SpotPrice: ", ethers.utils.formatEther(spotPrice))
 
 
   // await manager.deposit(ethers.utils.parseEther('1'))

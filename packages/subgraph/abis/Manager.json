@@ -79,19 +79,6 @@
   },
   {
     "inputs": [],
-    "name": "poolAddress",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "sharePrice",
     "outputs": [
       {
@@ -131,36 +118,10 @@
   },
   {
     "inputs": [],
-    "name": "tenderTokenAddress",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "underlyingToken",
     "outputs": [
       {
         "internalType": "contract IERC20",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "underlyingTokenAddress",
-    "outputs": [
-      {
-        "internalType": "address",
         "name": "",
         "type": "address"
       }

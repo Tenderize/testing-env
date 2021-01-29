@@ -7,6 +7,9 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 // // // local imports 
 // // import "./Proxy/ProxyTarget.sol";
 import "./Token/TenderToken.sol";
+import "./DEX.sol";
+import "./Manager.sol";
+import "./Token/ITenderToken.sol";
 
 // // external imports
 // import "@openzeppelin/contracts/access/Ownable.sol";
@@ -25,14 +28,21 @@ import "./Token/ITenderToken.sol";
 contract Staker {
     using SafeMath for uint256;
 
+    uint256 internal constant ONE = 1e18;
+    uint256 internal constant MAX = 2**256-1;
+    uint256 internal constant MIN = 1; 
+    uint256 internal constant liquidityPercentage = 1e17;
 
-
-   
     // Tokens
     // Underlying asset
-    IERC20 public token;
+    IERC20 public underlyingToken;
     // Derivative
     ITenderToken public tenderToken;
+    Manager public manager;
+
+    // Swap
+    DEX public pool; 
+
 
     // // Swap
     // Balancer public balancer; 
@@ -40,8 +50,18 @@ contract Staker {
     // IWETH weth;
 
     // staking
-    uint256 public stakedUnderlying = 100*10**18;
-    uint256 public stakingRewards = 5*10**18;
+    uint256 public stakedUnderlying;
+    uint256 public stakingRewards;
+
+    constructor (address _underlyingToken_addr, address _tenderToken_addr, address _pool_addr) public {
+        underlyingToken = IERC20(_underlyingToken_addr);
+        tenderToken = ITenderToken(_tenderToken_addr);
+        pool = DEX(_pool_addr);
+            }
+    function initManager(address _manager_addr) public {
+        manager = Manager(_manager_addr);
+        underlyingToken.approve(address(manager), MAX);
+    }    
 
     // TODO: WETH and oneInch can be constants 
     // Balancer Pool needs to be created in constructor because we can not add liquidity for both tokens otherwise
@@ -57,6 +77,7 @@ contract Staker {
 
     function _stake(uint256 _stakeAmount) public virtual returns (bool) {
         stakedUnderlying += _stakeAmount;
+        require(underlyingToken.transferFrom(msg.sender, address(this), _stakeAmount), "ERR_TOKEN_TANSFERFROM");
         return true;
     }
 

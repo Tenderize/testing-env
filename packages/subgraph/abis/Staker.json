@@ -2,6 +2,27 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_underlyingToken_addr",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_tenderToken_addr",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_pool_addr",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "_stakeAmount",
         "type": "uint256"
@@ -51,6 +72,45 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_manager_addr",
+        "type": "address"
+      }
+    ],
+    "name": "initManager",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "manager",
+    "outputs": [
+      {
+        "internalType": "contract Manager",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pool",
+    "outputs": [
+      {
+        "internalType": "contract DEX",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "stakedUnderlying",
     "outputs": [
@@ -91,7 +151,7 @@
   },
   {
     "inputs": [],
-    "name": "token",
+    "name": "underlyingToken",
     "outputs": [
       {
         "internalType": "contract IERC20",

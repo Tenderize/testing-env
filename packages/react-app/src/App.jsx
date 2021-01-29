@@ -191,6 +191,14 @@ function App(props) {
               address={address}
               blockExplorer={blockExplorer}
             />
+            <Contract
+              name="Staker"
+              signer={userProvider.getSigner()}
+              provider={localProvider}
+              address={address}
+              blockExplorer={blockExplorer}
+            />
+          
 
             
 
@@ -211,7 +219,7 @@ function App(props) {
             />
 
             <Contract
-              name="Cats"
+              name="TenderToken"
               signer={userProvider.getSigner()}
               provider={localProvider}
               address={address}
