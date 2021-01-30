@@ -45,6 +45,11 @@ contract Manager {
 
     uint256 public mintedForPool;
 
+    // helpers REMOVE later
+    uint256 public outstanding;
+    uint256 public tenderSupply;
+    uint256 public sp;  
+
 
     // TODO: WETH and oneInch can be constants 
     // Balancer Pool needs to be created in constructor because we can not add liquidity for both tokens otherwise
@@ -60,11 +65,30 @@ contract Manager {
         // tenderToken.approve(address(pool), MAX);
         }
 
-    function sharePrice() public view returns (uint256) {
-        uint256 tenderSupply = tenderToken.totalSupply().sub(mintedForPool);
-        uint256 outstanding = underlyingToken.balanceOf(address(this)).add(underlyingToken.balanceOf(address(staker))).add(underlyingToken.balanceOf(address(pool)));
-        if (tenderSupply ==  0 || outstanding == 0 ) { return 0; }
-        return outstanding.mul(1e18).div(tenderSupply);
+    function sharePrice() public returns (uint256) {
+        tenderSupply = tenderToken.totalSupply().sub(mintedForPool);
+        outstanding = underlyingToken.balanceOf(address(this)).add(underlyingToken.balanceOf(address(staker))).add(underlyingToken.balanceOf(address(pool)));
+        if (tenderSupply ==  0) { 
+            return 0; 
+            } else {
+                return outstanding.mul(1e18).div(tenderSupply);
+            }
+
+        
+    }
+
+    function h_sp_calc() public {
+        sp = outstanding.mul(1e18).div(tenderSupply);
+    }
+
+    function whatIsSharePrice() public returns (uint256) {
+        return sharePrice();
+    }
+
+    function initPool(uint256 _initial_liquidity) public {
+        pool.init(_initial_liquidity);
+        mintedForPool += _initial_liquidity;
+
     }
 
     function mintTender(uint256 _amount) public {

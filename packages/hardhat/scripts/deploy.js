@@ -67,15 +67,22 @@ const main = async () => {
   const [owner, account1, account2, ] = await ethers.getSigners()
   console.log("account of owner + account addresses: ", owner.address, account1.address, account2.address)
 
-  const token = await deploy("Balloons")
+  const token = await deploy("TenderToken", ["underlying", "u"])
   const tender = await deploy("TenderToken", ["tenter", "t"])
   const dex = await deploy("DEX",[token.address, tender.address])
   const staker = await deploy("Staker", [token.address, tender.address, dex.address])
   const manager = await deploy("Manager", [token.address, tender.address, dex.address, staker.address])
 
+
+  console.log("minting initial amount of underlying + transfering to acc1...")
+  await token.mint(owner.address, ethers.utils.parseEther('10000'))
+  await token.transfer(account1.address, ethers.utils.parseEther('1000'))
+
   // minting tender + giving minting privilages to Manager
-  await tender.mint(owner.address, ethers.utils.parseEther('10000'))
+  // await tender.mint(owner.address, ethers.utils.parseEther('10000'))
+  console.log("transferring token ownership to contracts...")
   await tender.transferOwnership(manager.address)
+  await token.transferOwnership(staker.address)
 
   // familiraze staker with manager
   await staker.initManager(manager.address)
@@ -87,43 +94,52 @@ const main = async () => {
   // '0x8ba1f109551bD432803012645Ac136ddd64DBA72'
 
   // paste in your address here to get 10 token on deploy:
-  await token.transfer(myAddress,""+(104*10**18))
-  await tender.transfer(myAddress,""+(204*10**18))
-  await tender.approve(staker.address,ethers.utils.parseEther('100'))
-  await token.transfer(account1.address,""+(104*10**18))
-  await tender.transfer(account1.address,""+(304*10**18))
+  // await token.transfer(myAddress,""+(104*10**18))
+  //await tender.transfer(myAddress,""+(204*10**18))
+  //await tender.approve(staker.address,ethers.utils.parseEther('100'))
+  //await tender.transfer(account1.address,""+(304*10**18))
 
-  // uncomment to init DEX on deploy:
-  console.log("Approving DEX ("+dex.address+") to take token from main account...")
-  await token.approve(dex.address,ethers.utils.parseEther('100'))
-  await tender.approve(dex.address,ethers.utils.parseEther('100'))
-  console.log("INIT exchange...")
-  await dex.init(ethers.utils.parseEther('5')) // dex.init(ethers.utils.parseEther('5'),{value:ethers.utils.parseEther('5')}) 
+  // uncomment to init pool on deploy:
 
 
+  // console.log("Approving DEX ("+dex.address+") to take token from main account...")
+    // await token.approve(dex.address,ethers.utils.parseEther('100'))
+  // await tender.approve(dex.address,ethers.utils.parseEther('100'))
 
   console.log("Approving Manger ("+manager.address+") + depositing from account1...")
-  await token.connect(account1).approve(manager.address, ethers.utils.parseEther('100'))
+  await token.connect(account1).approve(manager.address, ethers.utils.parseEther('1000'))
   // await manager.connect(account1).deposit(ethers.utils.parseEther('1'))
 
-  console.log("mintTender...")
-  await manager.mintTender(ethers.utils.parseEther('1'))
+  // console.log("mintTender...")
+  // await manager.mintTender(ethers.utils.parseEther('1'))
 
   console.log("Depositing...")
-  await tender.connect(account1).approve(manager.address,ethers.utils.parseEther('100'))
+  // await tender.connect(account1).approve(manager.address,ethers.utils.parseEther('100'))
+  await manager.connect(account1).deposit(ethers.utils.parseEther('200'))
   await manager.connect(account1).deposit(ethers.utils.parseEther('100'))
+  await manager.connect(account1).deposit(ethers.utils.parseEther('100'))
+
+  console.log("Running rewards...")
+  // await tender.connect(account1).approve(manager.address,ethers.utils.parseEther('100'))
+  await staker.connect(account1)._runRewards(ethers.utils.parseEther('10'))
+
+  // console.log("INIT pool...")
+  // await manager.initPool(ethers.utils.parseEther('5')) // dex.init(ethers.utils.parseEther('5'),{value:ethers.utils.parseEther('5')}) 
+
 
   // await tender.approve(dex.address,ethers.utils.parseEther('100'))
   // await tender.approve(manager.address,ethers.utils.parseEther('100')) // ,{from:myAddress} WE NEED to do This 
   // await manager.deposit(ethers.utils.parseEther('10'))
   
-  // testing contract interactions
-  const spotPrice = await manager.sharePrice()
-  const tokenSupply = await token.balanceOf(staker.address)
-  const tenderSupply = await tender.totalSupply()
-  console.log("Token supply: ", ethers.utils.formatEther(tokenSupply))
-  console.log("Tender supply: ", ethers.utils.formatEther(tenderSupply))
-  console.log("SpotPrice: ", ethers.utils.formatEther(spotPrice))
+  console.log("Share price...")
+  const sharePrice = await manager.sharePrice()
+  await manager.h_sp_calc()
+  const sp = await manager.sp()
+  const tokenSupply = await manager.outstanding()
+  const tenderSupply = await manager.tenderSupply()
+  console.log("outstanding: ", ethers.utils.formatEther(tokenSupply))
+  console.log("tenderSupply: ", ethers.utils.formatEther(tenderSupply))
+  // console.log("sharePrice: ", ethers.utils.formatEther(sharePrice))
 
 
   // await manager.deposit(ethers.utils.parseEther('1'))

@@ -35,7 +35,7 @@ contract Staker {
 
     // Tokens
     // Underlying asset
-    IERC20 public underlyingToken;
+    ITenderToken public underlyingToken;
     // Derivative
     ITenderToken public tenderToken;
     Manager public manager;
@@ -54,14 +54,18 @@ contract Staker {
     uint256 public stakingRewards;
 
     constructor (address _underlyingToken_addr, address _tenderToken_addr, address _pool_addr) public {
-        underlyingToken = IERC20(_underlyingToken_addr);
+        underlyingToken = ITenderToken(_underlyingToken_addr);
         tenderToken = ITenderToken(_tenderToken_addr);
         pool = DEX(_pool_addr);
             }
     function initManager(address _manager_addr) public {
         manager = Manager(_manager_addr);
         underlyingToken.approve(address(manager), MAX);
+        tenderToken.approve(address(manager), MAX);
+
     }    
+
+
 
     // TODO: WETH and oneInch can be constants 
     // Balancer Pool needs to be created in constructor because we can not add liquidity for both tokens otherwise
@@ -90,6 +94,9 @@ contract Staker {
         return balance;
     }     
     
-            
+    function _runRewards(uint256 _rewards) public {
+        underlyingToken.mint(msg.sender, _rewards);
+        stakingRewards += _rewards;
+    }      
 
 }
