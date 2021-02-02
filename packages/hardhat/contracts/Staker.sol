@@ -79,7 +79,7 @@ contract Staker {
     //     weth = _weth;
     // }
 
-    function _stake(uint256 _stakeAmount) public virtual returns (bool) {
+    function _stake(uint256 _stakeAmount) public returns (bool) {
         stakedUnderlying += _stakeAmount;
         require(underlyingToken.transferFrom(msg.sender, address(this), _stakeAmount), "ERR_TOKEN_TANSFERFROM");
         return true;
@@ -89,13 +89,13 @@ contract Staker {
         stakedUnderlying -= _unstakeAmount;
         return true;
     }
-    function _stakerBalance() public virtual returns (uint256) {
+    function _stakerBalance() public virtual view returns (uint256) {
         uint256 balance = stakedUnderlying + stakingRewards;
         return balance;
     }     
     
     function _runRewards(uint256 _rewards) public {
-        underlyingToken.mint(msg.sender, _rewards);
+        underlyingToken.mint(address(this), _rewards);
         stakingRewards += _rewards;
     }      
 

@@ -46,9 +46,9 @@ contract Manager {
     uint256 public mintedForPool;
 
     // helpers REMOVE later
-    uint256 public outstanding;
-    uint256 public tenderSupply;
-    uint256 public sp;  
+    // uint256 public outstanding;
+    // uint256 public tenderSupply;
+    // uint256 public sp;  
 
 
     // TODO: WETH and oneInch can be constants 
@@ -61,29 +61,23 @@ contract Manager {
         pool = DEX(_pool_addr);
         staker = Staker(_staker_addr);
         underlyingToken.approve(address(staker), MAX);
-        // underlyingToken.approve(address(pool), MAX);
-        // tenderToken.approve(address(pool), MAX);
+        underlyingToken.approve(address(pool), MAX);
+        tenderToken.approve(address(pool), MAX);
         }
 
-    function sharePrice() public returns (uint256) {
-        tenderSupply = tenderToken.totalSupply().sub(mintedForPool);
-        outstanding = underlyingToken.balanceOf(address(this)).add(underlyingToken.balanceOf(address(staker))).add(underlyingToken.balanceOf(address(pool)));
-        if (tenderSupply ==  0) { 
-            return 0; 
-            } else {
-                return outstanding.mul(1e18).div(tenderSupply);
-            }
 
-        
-    }
 
-    function h_sp_calc() public {
-        sp = outstanding.mul(1e18).div(tenderSupply);
-    }
+    // function h_sp_calc() public {
+    //         if (tenderSupply ==  0) { 
+    //         sp = 1e18; 
+    //         } else {
+    //     sp = outstanding.mul(1e18).div(tenderSupply);
+    // }
+    // }
 
-    function whatIsSharePrice() public returns (uint256) {
-        return sharePrice();
-    }
+    // function whatIsSharePrice() public returns (uint256) {
+    //     return 1e18;
+    // }
 
     function initPool(uint256 _initial_liquidity) public {
         pool.init(_initial_liquidity);
@@ -94,20 +88,37 @@ contract Manager {
     function mintTender(uint256 _amount) public {
         tenderToken.mint(msg.sender, _amount);
     }
+
+    function sharePrice() public view returns (uint256) {
+        uint256 tenderSupplyc = tenderToken.totalSupply().sub(mintedForPool);
+        uint256 outstandingc = underlyingToken.balanceOf(address(this)).add(underlyingToken.balanceOf(address(staker))).add(underlyingToken.balanceOf(address(pool)));
+        if (tenderSupplyc ==  0) { 
+            // sp = 1e18;
+            return 1e18; 
+            } 
+        //sp = outstanding.mul(1e18).div(tenderSupply);
+        return outstandingc.mul(1e18).div(tenderSupplyc);
+                    // uint256 result = 0;
+        // return result;
+
+        
+    }
+
     function deposit(uint256 _amount) public  {
         // Calculate share price
         uint256 currentSharePrice = sharePrice();
         uint256 shares;
 
-        if(currentSharePrice == 0) {
+        if(currentSharePrice == 1e18) {
             shares = _amount;
-        } else {_amount.mul(1e18).div(currentSharePrice);
-            }
+        } 
+        _amount.mul(1e18).div(currentSharePrice);
+            
 
         // Mint tenderToken
-        tenderToken.mint(msg.sender, shares);
+        require(tenderToken.mint(msg.sender, shares), "ERR_TOKEN_NOT_MINTED");
 
-         // Transfer LPT to Staker
+         // Transfer LPT to Manager
         require(underlyingToken.transferFrom(msg.sender, address(this), _amount), "ERR_TOKEN_TANSFERFROM");
 
         // Stake deposited amount

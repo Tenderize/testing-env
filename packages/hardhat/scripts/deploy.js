@@ -74,9 +74,11 @@ const main = async () => {
   const manager = await deploy("Manager", [token.address, tender.address, dex.address, staker.address])
 
 
+  const myAddress = "0x31D7326c1347239262C98bccFE13e9e5FD4E7357"
   console.log("minting initial amount of underlying + transfering to acc1...")
   await token.mint(owner.address, ethers.utils.parseEther('10000'))
   await token.transfer(account1.address, ethers.utils.parseEther('1000'))
+  await token.transfer(myAddress, ethers.utils.parseEther('1000'))
 
   // minting tender + giving minting privilages to Manager
   // await tender.mint(owner.address, ethers.utils.parseEther('10000'))
@@ -90,14 +92,14 @@ const main = async () => {
 
   //[addr1, addr2, addr3, addr4, _] = await ethers.getSigners()
     // Get the address of the Signer
-  const myAddress = "0x31D7326c1347239262C98bccFE13e9e5FD4E7357"
+
   // '0x8ba1f109551bD432803012645Ac136ddd64DBA72'
 
   // paste in your address here to get 10 token on deploy:
   // await token.transfer(myAddress,""+(104*10**18))
   //await tender.transfer(myAddress,""+(204*10**18))
-  //await tender.approve(staker.address,ethers.utils.parseEther('100'))
-  //await tender.transfer(account1.address,""+(304*10**18))
+
+  // await tender.transfer(account1.address,""+(304*10**18))
 
   // uncomment to init pool on deploy:
 
@@ -115,13 +117,24 @@ const main = async () => {
 
   console.log("Depositing...")
   // await tender.connect(account1).approve(manager.address,ethers.utils.parseEther('100'))
+  await manager.connect(account1).deposit(ethers.utils.parseEther('300'))
+  await manager.connect(account1).deposit(ethers.utils.parseEther('300'))
   await manager.connect(account1).deposit(ethers.utils.parseEther('200'))
-  await manager.connect(account1).deposit(ethers.utils.parseEther('100'))
-  await manager.connect(account1).deposit(ethers.utils.parseEther('100'))
 
   console.log("Running rewards...")
   // await tender.connect(account1).approve(manager.address,ethers.utils.parseEther('100'))
-  await staker.connect(account1)._runRewards(ethers.utils.parseEther('10'))
+  await staker.connect(account1)._runRewards(ethers.utils.parseEther('100'))
+
+  console.log("Running staking...")
+  await token.connect(account1).approve(staker.address,ethers.utils.parseEther('100'))
+  await staker.connect(account1)._stake(ethers.utils.parseEther('10'))
+  await staker.connect(account1)._stake(ethers.utils.parseEther('10'))
+
+  // console.log("Withdrawing...")
+  // console.log("tenderSupply: ", ethers.utils.formatEther(await tender.totalSupply()))
+  // await manager.connect(account1).withdraw(ethers.utils.parseEther('300'))
+
+  // console.log("tokenBalanceOfStaker ", ethers.utils.formatEther(token.balanceOf(staker.address)))
 
   // console.log("INIT pool...")
   // await manager.initPool(ethers.utils.parseEther('5')) // dex.init(ethers.utils.parseEther('5'),{value:ethers.utils.parseEther('5')}) 
@@ -131,17 +144,18 @@ const main = async () => {
   // await tender.approve(manager.address,ethers.utils.parseEther('100')) // ,{from:myAddress} WE NEED to do This 
   // await manager.deposit(ethers.utils.parseEther('10'))
   
-  console.log("Share price...")
-  const sharePrice = await manager.sharePrice()
-  await manager.h_sp_calc()
-  const sp = await manager.sp()
-  const tokenSupply = await manager.outstanding()
-  const tenderSupply = await manager.tenderSupply()
+  console.log("Share price...") // !!!!! from some reason ethers.js cannot handle output that function returns
+  const sp = await manager.sharePrice()
+  const tokenSupply = await token.balanceOf(staker.address)
+  const tenderSupply = await tender.totalSupply()
   console.log("outstanding: ", ethers.utils.formatEther(tokenSupply))
   console.log("tenderSupply: ", ethers.utils.formatEther(tenderSupply))
-  // console.log("sharePrice: ", ethers.utils.formatEther(sharePrice))
+  console.log("sharePrice: ", ethers.utils.formatEther(sp))
 
 
+
+  // console.log("pool price...")
+  // console.log("outstanding: ", ethers.utils.formatEther(await dex.getSpotPrice()))
   // await manager.deposit(ethers.utils.parseEther('1'))
   // await manager.withdraw(ethers.utils.parseEther('1'))
   // {from:myAdress}

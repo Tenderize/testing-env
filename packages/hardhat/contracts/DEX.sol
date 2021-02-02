@@ -27,12 +27,21 @@ function init(uint256 tokens) public returns (uint256) {
   }
 
 
-function price(uint256 input_amount, uint256 input_reserve, uint256 output_reserve) public view returns (uint256) {
+function price(uint256 input_amount, uint256 input_reserve, uint256 output_reserve) public pure returns (uint256) {
   uint256 input_amount_with_fee = input_amount.mul(997);
   uint256 numerator = input_amount_with_fee.mul(output_reserve);
   uint256 denominator = input_reserve.mul(1000).add(input_amount_with_fee);
   return numerator / denominator;
   }
+
+  function priceStable(uint256 input_amount, uint256 input_reserve, uint256 output_reserve) public view returns (uint256) {
+  uint256 input_amount_with_fee = input_amount.mul(997);
+  uint256 numerator = input_amount_with_fee.mul(output_reserve);
+  uint256 denominator = input_reserve.mul(1000).add(input_amount_with_fee);
+  return numerator / denominator;
+  }
+
+
 function getSpotPrice() public view returns (uint256) {
   uint256 numerator = token.balanceOf(address(this));
   uint256 denominator = tender.balanceOf(address(this));
