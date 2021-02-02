@@ -26,6 +26,13 @@ function init(uint256 tokens) public returns (uint256) {
   return totalLiquidity;
   }
 
+function tokenBalance() public view returns (uint256) {
+  return token.balanceOf(address(this));
+}
+
+function tenderBalance() public view returns (uint256) {
+  return tender.balanceOf(address(this));
+}
 
 function price(uint256 input_amount, uint256 input_reserve, uint256 output_reserve) public pure returns (uint256) {
   uint256 input_amount_with_fee = input_amount.mul(997);
@@ -34,7 +41,7 @@ function price(uint256 input_amount, uint256 input_reserve, uint256 output_reser
   return numerator / denominator;
   }
 
-  function priceStable(uint256 input_amount, uint256 input_reserve, uint256 output_reserve) public view returns (uint256) {
+  function priceStable(uint256 input_amount, uint256 input_reserve, uint256 output_reserve) public pure returns (uint256) {
   uint256 input_amount_with_fee = input_amount.mul(997);
   uint256 numerator = input_amount_with_fee.mul(output_reserve);
   uint256 denominator = input_reserve.mul(1000).add(input_amount_with_fee);
@@ -45,13 +52,14 @@ function price(uint256 input_amount, uint256 input_reserve, uint256 output_reser
 function getSpotPrice() public view returns (uint256) {
   uint256 numerator = token.balanceOf(address(this));
   uint256 denominator = tender.balanceOf(address(this));
-  return numerator.div(denominator);
+  return numerator.mul(1e18).div(denominator);
 }
+
 function tenderToToken(uint256 tenders) public returns (uint256) {
   uint256 token_reserve = token.balanceOf(address(this));
   uint256 tender_reserve = tender.balanceOf(address(this));
   uint256 token_bought = price(tenders, tender_reserve, token_reserve);
-  msg.sender.transfer(token_bought);
+  token.transfer(msg.sender, token_bought);
   require(tender.transferFrom(msg.sender, address(this), tenders));
   return token_bought;
 }
@@ -59,7 +67,7 @@ function tokenToTender(uint256 tokens) public returns (uint256) {
   uint256 token_reserve = token.balanceOf(address(this));
   uint256 tender_reserve = tender.balanceOf(address(this));
   uint256 tender_bought = price(tokens, token_reserve, tender_reserve);
-  msg.sender.transfer(tender_bought);
+  tender.transfer(msg.sender, tender_bought);
   require(token.transferFrom(msg.sender, address(this), tokens));
   return tender_bought;
 }

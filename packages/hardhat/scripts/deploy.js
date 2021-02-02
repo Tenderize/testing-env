@@ -2,7 +2,7 @@
 const fs = require("fs");
 const chalk = require("chalk");
 const { config, ethers } = require("hardhat");
-const { utils } = require("ethers");
+const { utils, BigNumber } = require("ethers");
 const R = require("ramda");
 
 
@@ -77,7 +77,8 @@ const main = async () => {
   const myAddress = "0x31D7326c1347239262C98bccFE13e9e5FD4E7357"
   console.log("minting initial amount of underlying + transfering to acc1...")
   await token.mint(owner.address, ethers.utils.parseEther('10000'))
-  await token.transfer(account1.address, ethers.utils.parseEther('1000'))
+  await token.mint(account1.address, ethers.utils.parseEther('10000'))
+  await token.transfer(account1.address, ethers.utils.parseEther('5000'))
   await token.transfer(myAddress, ethers.utils.parseEther('1000'))
 
   // minting tender + giving minting privilages to Manager
@@ -109,7 +110,8 @@ const main = async () => {
   // await tender.approve(dex.address,ethers.utils.parseEther('100'))
 
   console.log("Approving Manger ("+manager.address+") + depositing from account1...")
-  await token.connect(account1).approve(manager.address, ethers.utils.parseEther('1000'))
+  await token.connect(account1).approve(manager.address, ethers.utils.parseEther('2000'))
+  await tender.connect(account1).approve(manager.address, ethers.utils.parseEther('2000'))
   // await manager.connect(account1).deposit(ethers.utils.parseEther('1'))
 
   // console.log("mintTender...")
@@ -124,33 +126,52 @@ const main = async () => {
   console.log("Running rewards...")
   // await tender.connect(account1).approve(manager.address,ethers.utils.parseEther('100'))
   await staker.connect(account1)._runRewards(ethers.utils.parseEther('100'))
+  await staker.connect(account1)._runRewards(ethers.utils.parseEther('10'))
 
-  console.log("Running staking...")
-  await token.connect(account1).approve(staker.address,ethers.utils.parseEther('100'))
-  await staker.connect(account1)._stake(ethers.utils.parseEther('10'))
-  await staker.connect(account1)._stake(ethers.utils.parseEther('10'))
+  // console.log("Running staking...")
+  // await token.connect(account1).approve(staker.address,ethers.utils.parseEther('100'))
+  // await staker.connect(account1)._stake(ethers.utils.parseEther('10'))
+  // await staker.connect(account1)._stake(ethers.utils.parseEther('10'))
 
-  // console.log("Withdrawing...")
-  // console.log("tenderSupply: ", ethers.utils.formatEther(await tender.totalSupply()))
-  // await manager.connect(account1).withdraw(ethers.utils.parseEther('300'))
+
+
+  console.log("INIT pool...")
+
+  // await token.transfer(manager.address, ethers.utils.parseEther('300'))
+  // await tender.connect(account1).transfer(manager.address, ethers.utils.parseEther('300'))
+  await manager.connect(account1).initPool(ethers.utils.parseEther('300'))
+
+  // console.log("tokenBalanceOfManager: ", ethers.utils.formatEther(await token.balanceOf(manager.address)))
+  // console.log("tenderBalanceOfManager: ", ethers.utils.formatEther(await tender.balanceOf(manager.address)))
+
+  console.log("Withdrawing...")
+  await manager.connect(account1).withdraw(ethers.utils.parseEther('30'))
+  await manager.connect(account1).withdraw(ethers.utils.parseEther('60'))
 
   // console.log("tokenBalanceOfStaker ", ethers.utils.formatEther(token.balanceOf(staker.address)))
 
-  // console.log("INIT pool...")
   // await manager.initPool(ethers.utils.parseEther('5')) // dex.init(ethers.utils.parseEther('5'),{value:ethers.utils.parseEther('5')}) 
 
 
   // await tender.approve(dex.address,ethers.utils.parseEther('100'))
   // await tender.approve(manager.address,ethers.utils.parseEther('100')) // ,{from:myAddress} WE NEED to do This 
   // await manager.deposit(ethers.utils.parseEther('10'))
+
   
   console.log("Share price...") // !!!!! from some reason ethers.js cannot handle output that function returns
   const sp = await manager.sharePrice()
-  const tokenSupply = await token.balanceOf(staker.address)
+  const tokenStaker = await token.balanceOf(staker.address)
+  const tokenManager = await token.balanceOf(manager.address)
+  const tokenSupply = (new BigNumber.from(tokenStaker)).sub(new BigNumber.from(tokenManager))
+  const ts = tokenStaker.add(tokenManager)
+
   const tenderSupply = await tender.totalSupply()
-  console.log("outstanding: ", ethers.utils.formatEther(tokenSupply))
-  console.log("tenderSupply: ", ethers.utils.formatEther(tenderSupply))
+  const mintedForPool = await manager.mintedForPool()
+  const together = tenderSupply.sub(mintedForPool)  //(new BigNumber.from(tenderSupply)).sub(new BigNumber.from(mintedForPool))
+  console.log("outstanding: ", ethers.utils.formatEther(ts))
+  console.log("tenderSupply: ", ethers.utils.formatEther(together))
   console.log("sharePrice: ", ethers.utils.formatEther(sp))
+  // console.log("together: ", ethers.utils.formatEther(together))
 
 
 

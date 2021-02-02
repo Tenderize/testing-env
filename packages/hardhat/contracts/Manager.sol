@@ -80,6 +80,12 @@ contract Manager {
     // }
 
     function initPool(uint256 _initial_liquidity) public {
+        // Transfer LPT to Manager
+        require(underlyingToken.transferFrom(msg.sender, address(this), _initial_liquidity), "ERR_TOKEN_TANSFERFROM");
+
+        // Mint tenderToken
+        require(tenderToken.mint(address(this), _initial_liquidity), "ERR_TOKEN_NOT_MINTED");
+
         pool.init(_initial_liquidity);
         mintedForPool += _initial_liquidity;
 
@@ -91,7 +97,7 @@ contract Manager {
 
     function sharePrice() public view returns (uint256) {
         uint256 tenderSupplyc = tenderToken.totalSupply().sub(mintedForPool);
-        uint256 outstandingc = underlyingToken.balanceOf(address(this)).add(underlyingToken.balanceOf(address(staker))).add(underlyingToken.balanceOf(address(pool)));
+        uint256 outstandingc = underlyingToken.balanceOf(address(this)).add(underlyingToken.balanceOf(address(staker)));
         if (tenderSupplyc ==  0) { 
             // sp = 1e18;
             return 1e18; 

@@ -200,24 +200,7 @@ function App(props) {
             />
           
 
-            
-
-            <Contract
-              name="YourContract"
-              signer={userProvider.getSigner()}
-              provider={localProvider}
-              address={address}
-              blockExplorer={blockExplorer}
-            />
-
-            <Contract
-              name="Balloons"
-              signer={userProvider.getSigner()}
-              provider={localProvider}
-              address={address}
-              blockExplorer={blockExplorer}
-            />
-
+          
             <Contract
               name="TenderToken"
               signer={userProvider.getSigner()}
