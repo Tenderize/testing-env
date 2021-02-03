@@ -67,7 +67,7 @@ const main = async () => {
   const [owner, account1, account2, ] = await ethers.getSigners()
   console.log("account of owner + account addresses: ", owner.address, account1.address, account2.address)
 
-  const token = await deploy("TenderToken", ["underlying", "u"])
+  const token = await deploy("uToken", ["underlying", "u"])
   const tender = await deploy("TenderToken", ["tenter", "t"])
   const dex = await deploy("DEX",[token.address, tender.address])
   const staker = await deploy("Staker", [token.address, tender.address, dex.address])
@@ -112,6 +112,8 @@ const main = async () => {
   console.log("Approving Manger ("+manager.address+") + depositing from account1...")
   await token.connect(account1).approve(manager.address, ethers.utils.parseEther('2000'))
   await tender.connect(account1).approve(manager.address, ethers.utils.parseEther('2000'))
+  await token.connect(account1).approve(dex.address, ethers.utils.parseEther('2000'))
+  await tender.connect(account1).approve(dex.address, ethers.utils.parseEther('2000'))
   // await manager.connect(account1).deposit(ethers.utils.parseEther('1'))
 
   // console.log("mintTender...")
@@ -127,6 +129,7 @@ const main = async () => {
   // await tender.connect(account1).approve(manager.address,ethers.utils.parseEther('100'))
   await staker.connect(account1)._runRewards(ethers.utils.parseEther('100'))
   await staker.connect(account1)._runRewards(ethers.utils.parseEther('10'))
+  await staker.connect(account1)._runRewards(ethers.utils.parseEther('100'))
 
   // console.log("Running staking...")
   // await token.connect(account1).approve(staker.address,ethers.utils.parseEther('100'))
@@ -148,6 +151,20 @@ const main = async () => {
   await manager.connect(account1).withdraw(ethers.utils.parseEther('30'))
   await manager.connect(account1).withdraw(ethers.utils.parseEther('60'))
 
+  console.log("PoolTokenIn...")
+  await dex.connect(account1).tokenToTender(ethers.utils.parseEther('200'))
+  console.log("tokenBalanceOfPool: ", ethers.utils.formatEther(await token.balanceOf(dex.address)))
+  console.log("tenderBalanceOfPool: ", ethers.utils.formatEther(await tender.balanceOf(dex.address)))
+  console.log("tenderPoolPrice: ", ethers.utils.formatEther(await dex.getSpotPrice()))
+
+  console.log("PoolTenderIn...")
+  await dex.connect(account1).tenderToToken(ethers.utils.parseEther('100'))
+  console.log("tokenBalanceOfPool: ", ethers.utils.formatEther(await token.balanceOf(dex.address)))
+  console.log("tenderBalanceOfPool: ", ethers.utils.formatEther(await tender.balanceOf(dex.address)))
+  console.log("tenderPoolPrice: ", ethers.utils.formatEther(await dex.getSpotPrice()))
+
+
+
   // console.log("tokenBalanceOfStaker ", ethers.utils.formatEther(token.balanceOf(staker.address)))
 
   // await manager.initPool(ethers.utils.parseEther('5')) // dex.init(ethers.utils.parseEther('5'),{value:ethers.utils.parseEther('5')}) 
@@ -157,12 +174,12 @@ const main = async () => {
   // await tender.approve(manager.address,ethers.utils.parseEther('100')) // ,{from:myAddress} WE NEED to do This 
   // await manager.deposit(ethers.utils.parseEther('10'))
 
+  // const tokenSupply = (new BigNumber.from(tokenStaker)).sub(new BigNumber.from(tokenManager))
   
   console.log("Share price...") // !!!!! from some reason ethers.js cannot handle output that function returns
   const sp = await manager.sharePrice()
   const tokenStaker = await token.balanceOf(staker.address)
   const tokenManager = await token.balanceOf(manager.address)
-  const tokenSupply = (new BigNumber.from(tokenStaker)).sub(new BigNumber.from(tokenManager))
   const ts = tokenStaker.add(tokenManager)
 
   const tenderSupply = await tender.totalSupply()

@@ -26,6 +26,15 @@ function init(uint256 tokens) public returns (uint256) {
   return totalLiquidity;
   }
 
+// function fundPool(uint256 tokens) public returns (uint256) {
+//   require(totalLiquidity=!0,"DEX not initiated");
+//   totalLiquidity += tokens;
+//   liquidity[msg.sender] = totalLiquidity;
+//   require(token.transferFrom(msg.sender, address(this), tokens));
+//   require(tender.transferFrom(msg.sender, address(this), tokens));
+//   return totalLiquidity;
+//   }
+
 function tokenBalance() public view returns (uint256) {
   return token.balanceOf(address(this));
 }
@@ -72,25 +81,26 @@ function tokenToTender(uint256 tokens) public returns (uint256) {
   return tender_bought;
 }
 
-function deposit() public payable returns (uint256) {
-  uint256 eth_reserve = address(this).balance.sub(msg.value);
-  uint256 token_reserve = token.balanceOf(address(this));
-  uint256 token_amount = (msg.value.mul(token_reserve) / eth_reserve).add(1);
-  uint256 liquidity_minted = msg.value.mul(totalLiquidity) / eth_reserve;
-  liquidity[msg.sender] = liquidity[msg.sender].add(liquidity_minted);
-  totalLiquidity = totalLiquidity.add(liquidity_minted);
-  require(token.transferFrom(msg.sender, address(this), token_amount));
-  return liquidity_minted;
-}
-function withdraw(uint256 amount) public returns (uint256, uint256) {
-  uint256 token_reserve = token.balanceOf(address(this));
-  uint256 eth_amount = amount.mul(address(this).balance) / totalLiquidity;
-  uint256 token_amount = amount.mul(token_reserve) / totalLiquidity;
-  liquidity[msg.sender] = liquidity[msg.sender].sub(eth_amount);
-  totalLiquidity = totalLiquidity.sub(eth_amount);
-  msg.sender.transfer(eth_amount);
-  require(token.transfer(msg.sender, token_amount));
-  return (eth_amount, token_amount);
-}
+// function deposit(uint256 _amount) public payable returns (uint256) {
+//   uint256 _amount;
+//   uint256 tender_reserve = tender.balanceOf(address(this));
+//   uint256 token_reserve = token.balanceOf(address(this));
+//   uint256 token_amount = (_amount.mul(token_reserve) / eth_reserve).add(1);
+//   uint256 liquidity_minted = msg.value.mul(totalLiquidity) / eth_reserve;
+//   liquidity[msg.sender] = liquidity[msg.sender].add(liquidity_minted);
+//   totalLiquidity = totalLiquidity.add(liquidity_minted);
+//   require(token.transferFrom(msg.sender, address(this), token_amount));
+//   return liquidity_minted;
+// }
+// function withdraw(uint256 amount) public returns (uint256, uint256) {
+//   uint256 token_reserve = token.balanceOf(address(this));
+//   uint256 eth_amount = amount.mul(address(this).balance) / totalLiquidity;
+//   uint256 token_amount = amount.mul(token_reserve) / totalLiquidity;
+//   liquidity[msg.sender] = liquidity[msg.sender].sub(eth_amount);
+//   totalLiquidity = totalLiquidity.sub(eth_amount);
+//   msg.sender.transfer(eth_amount);
+//   require(token.transfer(msg.sender, token_amount));
+//   return (eth_amount, token_amount);
+// }
 
 }

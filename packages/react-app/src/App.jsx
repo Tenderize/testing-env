@@ -199,7 +199,13 @@ function App(props) {
               blockExplorer={blockExplorer}
             />
           
-
+          <Contract
+              name="uToken"
+              signer={userProvider.getSigner()}
+              provider={localProvider}
+              address={address}
+              blockExplorer={blockExplorer}
+            />
           
             <Contract
               name="TenderToken"
