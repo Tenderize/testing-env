@@ -118,7 +118,7 @@ contract Manager {
         if(currentSharePrice == 1e18) {
             shares = _amount;
         } 
-        _amount.mul(1e18).div(currentSharePrice);
+        shares = _amount.mul(1e18).div(currentSharePrice);
             
 
         // Mint tenderToken
