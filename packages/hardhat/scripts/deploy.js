@@ -150,15 +150,18 @@ const main = async () => {
   // await tender.connect(account1).transfer(manager.address, ethers.utils.parseEther('300'))
   await manager.connect(account1).initPool(ethers.utils.parseEther('300'))
 
+
+  console.log("tenderPoolPrice: ", ethers.utils.formatEther(await dex.getSpotPrice()))
+
   // console.log("tokenBalanceOfManager: ", ethers.utils.formatEther(await token.balanceOf(manager.address)))
   // console.log("tenderBalanceOfManager: ", ethers.utils.formatEther(await tender.balanceOf(manager.address)))
 
-  console.log("Withdrawing...")
-  await manager.connect(account1).withdraw(ethers.utils.parseEther('30'))
-  await manager.connect(account1).withdraw(ethers.utils.parseEther('60'))
+  // console.log("Withdrawing...")
+  // await manager.connect(account1).withdraw(ethers.utils.parseEther('30'))
+  // await manager.connect(account1).withdraw(ethers.utils.parseEther('70'))
 
-  console.log("PoolTokenIn...")
-  await dex.connect(account1).tokenToTender(ethers.utils.parseEther('200'))
+  // console.log("PoolTokenIn...")
+  // await dex.connect(account1).tokenToTender(ethers.utils.parseEther('200'))
   console.log("tokenBalanceOfPool: ", ethers.utils.formatEther(await token.balanceOf(dex.address)))
   console.log("tenderBalanceOfPool: ", ethers.utils.formatEther(await tender.balanceOf(dex.address)))
   console.log("tenderPoolPrice: ", ethers.utils.formatEther(await dex.getSpotPrice()))
@@ -169,6 +172,11 @@ const main = async () => {
   console.log("tokenBalanceOfPool: ", ethers.utils.formatEther(await token.balanceOf(dex.address)))
   console.log("tenderBalanceOfPool: ", ethers.utils.formatEther(await tender.balanceOf(dex.address)))
   console.log("tenderPoolPrice: ", ethers.utils.formatEther(await dex.getSpotPrice()))
+  console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
+
+
+  console.log("Running rewards...")
+  await staker.connect(account1)._runRewards(ethers.utils.parseEther('100'))
   console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
 
 

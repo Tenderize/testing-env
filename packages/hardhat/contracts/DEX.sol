@@ -17,12 +17,12 @@ contract DEX {
     tender = IERC20(tender_addr);
   }
 
-function init(uint256 tokens) public returns (uint256) {
+function init(uint256 tokens, uint256 tenders) public returns (uint256) {
   require(totalLiquidity==0,"DEX:init - already has liquidity");
   totalLiquidity = tokens;
   liquidity[msg.sender] = totalLiquidity;
   require(token.transferFrom(msg.sender, address(this), tokens));
-  require(tender.transferFrom(msg.sender, address(this), tokens));
+  require(tender.transferFrom(msg.sender, address(this), tenders));
   return totalLiquidity;
   }
 
@@ -61,14 +61,16 @@ function price(uint256 input_amount, uint256 input_reserve, uint256 output_reser
 function getSpotPrice() public view returns (uint256) {
   uint256 numerator = token.balanceOf(address(this));
   uint256 denominator = tender.balanceOf(address(this));
+  if(denominator == 0) return 1e18;
   return numerator.mul(1e18).div(denominator);
 }
 
+// TODO this fx should fail if pools has not enough tender to send back but it doesnt!!!???
 function tenderToToken(uint256 tenders) public returns (uint256) {
   uint256 token_reserve = token.balanceOf(address(this));
   uint256 tender_reserve = tender.balanceOf(address(this));
   uint256 token_bought = price(tenders, tender_reserve, token_reserve);
-  token.transfer(msg.sender, token_bought);
+  require(token.transfer(msg.sender, token_bought));
   require(tender.transferFrom(msg.sender, address(this), tenders));
   return token_bought;
 }

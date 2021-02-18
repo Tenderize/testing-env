@@ -34,6 +34,11 @@
         "internalType": "uint256",
         "name": "tokens",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tenders",
+        "type": "uint256"
       }
     ],
     "name": "init",

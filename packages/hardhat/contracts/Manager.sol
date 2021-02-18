@@ -80,14 +80,26 @@ contract Manager {
     // }
 
     function initPool(uint256 _initial_liquidity) public {
-        // Transfer LPT to Manager
+
+        
+        // Calculate share price + num of shares to mint
+        uint256 currentSharePrice = sharePrice();
+        uint256 shares;
+        if(currentSharePrice == 1e18) {
+            shares = _initial_liquidity;
+            } 
+        shares = _initial_liquidity.mul(1e18).div(currentSharePrice);
+        
+        // Transfer underlying token to get initial lq for pool
         require(underlyingToken.transferFrom(msg.sender, address(this), _initial_liquidity), "ERR_TOKEN_TANSFERFROM");
 
-        // Mint tenderToken
-        require(tenderToken.mint(address(this), _initial_liquidity), "ERR_TOKEN_NOT_MINTED");
 
-        pool.init(_initial_liquidity);
-        mintedForPool += _initial_liquidity;
+        // Mint tenderToken for pool + discount these tokens
+        require(tenderToken.mint(address(this), shares), "ERR_TOKEN_NOT_MINTED");
+        mintedForPool += shares;
+
+        pool.init(_initial_liquidity, shares);
+        
 
     }
 
