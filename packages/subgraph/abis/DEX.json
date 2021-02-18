@@ -16,6 +16,64 @@
     "type": "constructor"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "token_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "token_reserve",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tender_reserve",
+        "type": "uint256"
+      }
+    ],
+    "name": "amountTenderOut",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tender_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tender_reserve",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "token_reserve",
+        "type": "uint256"
+      }
+    ],
+    "name": "amountTokenOut",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "getSpotPrice",
     "outputs": [
@@ -56,6 +114,19 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "_manager_addr",
+        "type": "address"
+      }
+    ],
+    "name": "initManager",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
@@ -66,6 +137,19 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "manager",
+    "outputs": [
+      {
+        "internalType": "contract Manager",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",

@@ -2,12 +2,15 @@ pragma solidity ^0.6.6;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./Manager.sol";
 
 contract DEX {
 
   using SafeMath for uint256;
   IERC20 token;
   IERC20 tender;
+
+  Manager public manager;
 
   uint256 public totalLiquidity;
   mapping (address => uint256) public liquidity;
@@ -25,6 +28,13 @@ function init(uint256 tokens, uint256 tenders) public returns (uint256) {
   require(tender.transferFrom(msg.sender, address(this), tenders));
   return totalLiquidity;
   }
+
+    function initManager(address _manager_addr) public {
+        manager = Manager(_manager_addr);
+        // underlyingToken.approve(address(manager), MAX);
+        // tenderToken.approve(address(manager), MAX);
+
+    }    
 
 // function fundPool(uint256 tokens) public returns (uint256) {
 //   require(totalLiquidity=!0,"DEX not initiated");
@@ -50,6 +60,24 @@ function price(uint256 input_amount, uint256 input_reserve, uint256 output_reser
   return numerator / denominator;
   }
 
+function amountTokenOut(uint256 tender_amount, uint256 tender_reserve, uint256 token_reserve) public view returns (uint256) {
+  uint256 currentSharePrice = manager.sharePrice();
+  uint256 tender_amount_with_fee = tender_amount.mul(997);
+  uint256 norm_tender_reserve = tender_reserve.mul(1e18).div(currentSharePrice);
+  uint256 numerator = tender_amount_with_fee.mul(token_reserve);
+  uint256 denominator = norm_tender_reserve.mul(1000).add(tender_amount_with_fee);
+  return numerator / denominator;
+  }
+
+  function amountTenderOut(uint256 token_amount, uint256 token_reserve, uint256 tender_reserve) public view returns (uint256) {
+  uint256 currentSharePrice = manager.sharePrice();
+  uint256 token_amount_with_fee = token_amount.mul(997);
+  uint256 norm_tender_reserve = tender_reserve.mul(1e18).div(currentSharePrice);
+  uint256 numerator = token_amount_with_fee.mul(norm_tender_reserve);
+  uint256 denominator = token_reserve.mul(1000).add(token_amount_with_fee);
+  return numerator / denominator;
+  }
+
   function priceStable(uint256 input_amount, uint256 input_reserve, uint256 output_reserve) public pure returns (uint256) {
   uint256 input_amount_with_fee = input_amount.mul(997);
   uint256 numerator = input_amount_with_fee.mul(output_reserve);
@@ -69,7 +97,7 @@ function getSpotPrice() public view returns (uint256) {
 function tenderToToken(uint256 tenders) public returns (uint256) {
   uint256 token_reserve = token.balanceOf(address(this));
   uint256 tender_reserve = tender.balanceOf(address(this));
-  uint256 token_bought = price(tenders, tender_reserve, token_reserve);
+  uint256 token_bought = amountTokenOut(tenders, tender_reserve, token_reserve);
   require(token.transfer(msg.sender, token_bought));
   require(tender.transferFrom(msg.sender, address(this), tenders));
   return token_bought;
@@ -77,7 +105,7 @@ function tenderToToken(uint256 tenders) public returns (uint256) {
 function tokenToTender(uint256 tokens) public returns (uint256) {
   uint256 token_reserve = token.balanceOf(address(this));
   uint256 tender_reserve = tender.balanceOf(address(this));
-  uint256 tender_bought = price(tokens, token_reserve, tender_reserve);
+  uint256 tender_bought = amountTenderOut(tokens, token_reserve, tender_reserve);
   tender.transfer(msg.sender, tender_bought);
   require(token.transferFrom(msg.sender, address(this), tokens));
   return tender_bought;
