@@ -52,6 +52,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "isPoolActivated",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -124,6 +137,30 @@
         "internalType": "contract ITenderToken",
         "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "underlyingToSend",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "positionInLine",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balanceOwed",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",

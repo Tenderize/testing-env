@@ -62,7 +62,7 @@ function price(uint256 input_amount, uint256 input_reserve, uint256 output_reser
 
 function amountTokenOut(uint256 tender_amount, uint256 tender_reserve, uint256 token_reserve) public view returns (uint256) {
   uint256 currentSharePrice = manager.sharePrice();
-  uint256 tender_amount_with_fee = tender_amount.mul(997);
+  uint256 tender_amount_with_fee = tender_amount.mul(997).mul(1e18).div(currentSharePrice);
   uint256 norm_tender_reserve = tender_reserve.mul(1e18).div(currentSharePrice);
   uint256 numerator = tender_amount_with_fee.mul(token_reserve);
   uint256 denominator = norm_tender_reserve.mul(1000).add(tender_amount_with_fee);
@@ -95,17 +95,20 @@ function getSpotPrice() public view returns (uint256) {
 
 // TODO this fx should fail if pools has not enough tender to send back but it doesnt!!!???
 function tenderToToken(uint256 tenders) public returns (uint256) {
+  uint256 currentSharePrice = manager.sharePrice();
+  uint256 norm_tenders = tenders.mul(1e18).div(currentSharePrice);
   uint256 token_reserve = token.balanceOf(address(this));
-  uint256 tender_reserve = tender.balanceOf(address(this));
-  uint256 token_bought = amountTokenOut(tenders, tender_reserve, token_reserve);
+  uint256 tender_reserve = tender.balanceOf(address(this)).mul(1e18).div(currentSharePrice);
+  uint256 token_bought = priceStable(norm_tenders, tender_reserve, token_reserve);
   require(token.transfer(msg.sender, token_bought));
   require(tender.transferFrom(msg.sender, address(this), tenders));
   return token_bought;
 }
 function tokenToTender(uint256 tokens) public returns (uint256) {
+  uint256 currentSharePrice = manager.sharePrice();
   uint256 token_reserve = token.balanceOf(address(this));
-  uint256 tender_reserve = tender.balanceOf(address(this));
-  uint256 tender_bought = amountTenderOut(tokens, token_reserve, tender_reserve);
+  uint256 tender_reserve = tender.balanceOf(address(this)).mul(1e18).div(currentSharePrice);
+  uint256 tender_bought = priceStable(tokens, token_reserve, tender_reserve);
   tender.transfer(msg.sender, tender_bought);
   require(token.transferFrom(msg.sender, address(this), tokens));
   return tender_bought;

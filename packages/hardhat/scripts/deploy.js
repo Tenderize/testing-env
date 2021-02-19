@@ -151,9 +151,19 @@ const main = async () => {
   // await token.transfer(manager.address, ethers.utils.parseEther('300'))
   // await tender.connect(account1).transfer(manager.address, ethers.utils.parseEther('300'))
   await manager.connect(account1).initPool(ethers.utils.parseEther('300'))
+  console.log("tokenBalanceOfPool: ", ethers.utils.formatEther(await token.balanceOf(dex.address)))
+  console.log("tenderBalanceOfPool: ", ethers.utils.formatEther(await tender.balanceOf(dex.address)))
+ 
 
 
   console.log("tenderPoolPrice: ", ethers.utils.formatEther(await dex.getSpotPrice()))
+
+
+  // console.log("Running rewards...")
+  // await staker.connect(account1)._runRewards(ethers.utils.parseEther('100'))
+  // console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
+
+
 
   // console.log("tokenBalanceOfManager: ", ethers.utils.formatEther(await token.balanceOf(manager.address)))
   // console.log("tenderBalanceOfManager: ", ethers.utils.formatEther(await tender.balanceOf(manager.address)))

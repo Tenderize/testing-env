@@ -45,10 +45,24 @@ contract Manager {
 
     uint256 public mintedForPool;
 
+
     // helpers REMOVE later
     // uint256 public outstanding;
     // uint256 public tenderSupply;
     // uint256 public sp;  
+
+    struct user {
+        uint8 positionInLine;
+        uint256 balanceOwed;
+    }
+    
+    uint8 counter;
+
+    mapping (address => user) public underlyingToSend;
+
+
+    // check if AMM pool is initiated
+    bool public isPoolActivated;
 
 
     // TODO: WETH and oneInch can be constants 
@@ -79,6 +93,13 @@ contract Manager {
     //     return 1e18;
     // }
 
+    function addToWaitingList(uint256 _underlyingTokens) internal returns(bool) {
+        underlyingToSend[msg.sender].positionInLine = counter++;
+        underlyingToSend[msg.sender].balanceOwed = _underlyingTokens;
+
+
+    }
+
     function initPool(uint256 _initial_liquidity) public {
 
         
@@ -99,6 +120,8 @@ contract Manager {
         mintedForPool += shares;
 
         pool.init(_initial_liquidity, shares);
+
+        isPoolActivated = true;
         
 
     }
