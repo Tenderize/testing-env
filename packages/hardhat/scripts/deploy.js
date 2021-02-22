@@ -77,7 +77,7 @@ const main = async () => {
 
 
   const myAddress = "0x31D7326c1347239262C98bccFE13e9e5FD4E7357"
-  console.log("minting initial amount of underlying + transfering to acc1...")
+  //console.log("minting initial amount of underlying + transfering to acc1...")
   await token.mint(owner.address, ethers.utils.parseEther('10000'))
   await token.mint(account1.address, ethers.utils.parseEther('10000'))
   await token.transfer(account1.address, ethers.utils.parseEther('5000'))
@@ -85,7 +85,7 @@ const main = async () => {
 
   // minting tender + giving minting privilages to Manager
   // await tender.mint(owner.address, ethers.utils.parseEther('10000'))
-  console.log("transferring token ownership to contracts...")
+  //console.log("transferring token ownership to contracts...")
   await tender.transferOwnership(manager.address)
   await token.transferOwnership(staker.address)
 
@@ -112,8 +112,8 @@ const main = async () => {
   // await tender.approve(dex.address,ethers.utils.parseEther('100'))
 
   // console.log("Approving Manger ("+manager.address+") + depositing from account1...")
-  await token.connect(account1).approve(manager.address, ethers.utils.parseEther('2000'))
-  await tender.connect(account1).approve(manager.address, ethers.utils.parseEther('2000'))
+  await token.connect(account1).approve(manager.address, ethers.utils.parseEther('4000'))
+  await tender.connect(account1).approve(manager.address, ethers.utils.parseEther('4000'))
   await token.connect(account1).approve(dex.address, ethers.utils.parseEther('2000'))
   await tender.connect(account1).approve(dex.address, ethers.utils.parseEther('2000'))
   // await manager.connect(account1).deposit(ethers.utils.parseEther('1'))
@@ -123,21 +123,26 @@ const main = async () => {
 
   console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
 
+  console.log("balanceOfManager: ", ethers.utils.formatEther(await token.balanceOf(manager.address)))
+  console.log("balanceOfStaker: ", ethers.utils.formatEther(await token.balanceOf(staker.address)))
+
   console.log("Depositing...")
   // await tender.connect(account1).approve(manager.address,ethers.utils.parseEther('100'))
-  await manager.connect(account1).deposit(ethers.utils.parseEther('300'))
-  await manager.connect(account1).deposit(ethers.utils.parseEther('300'))
-  await manager.connect(account1).deposit(ethers.utils.parseEther('200'))
-  // await manager.connect(account1).deposit(ethers.utils.parseEther('400'))
+  await manager.connect(account1).deposit(ethers.utils.parseEther('500'))
+
+
+  console.log("balanceOfManager: ", ethers.utils.formatEther(await token.balanceOf(manager.address)))
+  console.log("balanceOfStaker: ", ethers.utils.formatEther(await token.balanceOf(staker.address)))
+
   console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
   
 
-  console.log("Running rewards...")
-  // await tender.connect(account1).approve(manager.address,ethers.utils.parseEther('100'))
-  await staker.connect(account1)._runRewards(ethers.utils.parseEther('100'))
-  // await staker.connect(account1)._runRewards(ethers.utils.parseEther('10'))
+  // console.log("Running rewards...")
+  // // await tender.connect(account1).approve(manager.address,ethers.utils.parseEther('100'))
   // await staker.connect(account1)._runRewards(ethers.utils.parseEther('100'))
-  console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
+  // // await staker.connect(account1)._runRewards(ethers.utils.parseEther('10'))
+  // await staker.connect(account1)._runRewards(ethers.utils.parseEther('100'))
+  // console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
 
   // console.log("Running staking...")
   // await token.connect(account1).approve(staker.address,ethers.utils.parseEther('100'))
@@ -150,18 +155,24 @@ const main = async () => {
 
   // await token.transfer(manager.address, ethers.utils.parseEther('300'))
   // await tender.connect(account1).transfer(manager.address, ethers.utils.parseEther('300'))
-  await manager.connect(account1).initPool(ethers.utils.parseEther('300'))
+  await manager.connect(account1).initPool(ethers.utils.parseEther('1000'))
   console.log("tokenBalanceOfPool: ", ethers.utils.formatEther(await token.balanceOf(dex.address)))
   console.log("tenderBalanceOfPool: ", ethers.utils.formatEther(await tender.balanceOf(dex.address)))
  
 
 
   console.log("tenderPoolPrice: ", ethers.utils.formatEther(await dex.getSpotPrice()))
+  console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
+  
 
+  console.log("Running rewards...")
+  await staker.connect(account1)._runRewards(ethers.utils.parseEther('200'))
+  console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
+  console.log("tenderPoolPrice: ", ethers.utils.formatEther(await dex.getSpotPrice()))
 
-  // console.log("Running rewards...")
-  // await staker.connect(account1)._runRewards(ethers.utils.parseEther('100'))
-  // console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
+  console.log("getInLine")
+  await manager.connect(account1).getInLine(ethers.utils.parseEther('200'))
+  console.log(await manager.connect(account1).users(account1.address))
 
 
 
@@ -172,24 +183,39 @@ const main = async () => {
   // await manager.connect(account1).withdraw(ethers.utils.parseEther('30'))
   // await manager.connect(account1).withdraw(ethers.utils.parseEther('70'))
 
-  console.log("PoolTokenIn...")
-  await dex.connect(account1).tokenToTender(ethers.utils.parseEther('20'))
+  console.log("deactivateReserve: ", manager.setReserveActive(false))
+  console.log("Depositing... 500")
+  await manager.connect(account1).deposit(ethers.utils.parseEther('500'))
+  console.log("balanceOfManager: ", ethers.utils.formatEther(await token.balanceOf(manager.address)))
+  console.log("balanceOfStaker: ", ethers.utils.formatEther(await token.balanceOf(staker.address)))
+
+
+
+  console.log("PoolTokenIn...: 100")
+  await dex.connect(account1).tokenToTender(ethers.utils.parseEther('100'))
+  const tokenB1 = ethers.utils.formatEther(await token.balanceOf(dex.address)) //console.log("tenderBalanceOut: ", ethers.utils.formatEther(await dex.connect(account1).tokenToTender(ethers.utils.parseEther('100'))))
   console.log("tokenBalanceOfPool: ", ethers.utils.formatEther(await token.balanceOf(dex.address)))
   console.log("tenderBalanceOfPool: ", ethers.utils.formatEther(await tender.balanceOf(dex.address)))
+  console.log("tenderBalanceOut: ", ethers.utils.formatEther(ethers.utils.parseEther('1000').sub(await tender.balanceOf(dex.address))))
+
+
   console.log("tenderPoolPrice: ", ethers.utils.formatEther(await dex.getSpotPrice()))
   console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
 
-  console.log("PoolTenderIn...")
-  await dex.connect(account1).tenderToToken(ethers.utils.parseEther('10'))
+  console.log("PoolTenderIn...: 100")
+  await dex.connect(account1).tenderToToken(ethers.utils.parseEther('100'))
   console.log("tokenBalanceOfPool: ", ethers.utils.formatEther(await token.balanceOf(dex.address)))
   console.log("tenderBalanceOfPool: ", ethers.utils.formatEther(await tender.balanceOf(dex.address)))
+  console.log("tokenBalanceOut: ", ethers.utils.formatEther(ethers.utils.parseEther(tokenB1).sub(await token.balanceOf(dex.address))))
+
+
   console.log("tenderPoolPrice: ", ethers.utils.formatEther(await dex.getSpotPrice()))
   console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
 
 
-  console.log("Running rewards...")
-  await staker.connect(account1)._runRewards(ethers.utils.parseEther('100'))
-  console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
+  // console.log("Running rewards...")
+  // await staker.connect(account1)._runRewards(ethers.utils.parseEther('100'))
+  // console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
 
 
 
@@ -197,14 +223,14 @@ const main = async () => {
   console.log("Depositing...")
   await manager.connect(account1).deposit(ethers.utils.parseEther('300'))
   await manager.connect(account1).deposit(ethers.utils.parseEther('300'))
-  await manager.connect(account1).deposit(ethers.utils.parseEther('200'))
+  // await manager.connect(account1).deposit(ethers.utils.parseEther('200'))
   // await manager.connect(account1).deposit(ethers.utils.parseEther('400'))
   console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
 
   
   console.log("Withdrawing...")
   await manager.connect(account1).withdraw(ethers.utils.parseEther('30'))
-  await manager.connect(account1).withdraw(ethers.utils.parseEther('60'))
+  // await manager.connect(account1).withdraw(ethers.utils.parseEther('60'))
   console.log("sharePrice: ", ethers.utils.formatEther(await manager.sharePrice()))
   
 

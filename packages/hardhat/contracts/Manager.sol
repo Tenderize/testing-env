@@ -30,7 +30,7 @@ contract Manager {
    uint256 internal constant ONE = 1e18;
     uint256 internal constant MAX = 2**256-1;
     uint256 internal constant MIN = 1; 
-    uint256 internal constant liquidityPercentage = 1e17; 
+
 
    
     // Tokens
@@ -58,11 +58,17 @@ contract Manager {
     
     uint8 counter;
 
-    mapping (address => user) public underlyingToSend;
+    mapping (address => user) public users;
+
+    
+
 
 
     // check if AMM pool is initiated
     bool public isPoolActivated;
+
+    uint256 liquidityRatioForReserve = 1e17;
+    bool isReserveActive = true; 
 
 
     // TODO: WETH and oneInch can be constants 
@@ -93,33 +99,36 @@ contract Manager {
     //     return 1e18;
     // }
 
-    function addToWaitingList(uint256 _underlyingTokens) internal returns(bool) {
-        underlyingToSend[msg.sender].positionInLine = counter++;
-        underlyingToSend[msg.sender].balanceOwed = _underlyingTokens;
-
-
+    function setReserveActive(bool _setState) public returns(bool) {
+        isReserveActive = _setState;
+        return isReserveActive;
     }
+
+
 
     function initPool(uint256 _initial_liquidity) public {
 
+        //check if pool isn't active
+        require(isPoolActivated == false, "POOL_ALREADY_ACTIVE");
+
         
-        // Calculate share price + num of shares to mint
-        uint256 currentSharePrice = sharePrice();
-        uint256 shares;
-        if(currentSharePrice == 1e18) {
-            shares = _initial_liquidity;
-            } 
-        shares = _initial_liquidity.mul(1e18).div(currentSharePrice);
+        // // Calculate share price + num of shares to mint
+        // uint256 currentSharePrice = sharePrice();
+        // uint256 shares;
+        // if(currentSharePrice == 1e18) {
+        //     shares = _initial_liquidity;
+        //     } 
+        // shares = _initial_liquidity.mul(1e18).div(currentSharePrice);
         
         // Transfer underlying token to get initial lq for pool
         require(underlyingToken.transferFrom(msg.sender, address(this), _initial_liquidity), "ERR_TOKEN_TANSFERFROM");
 
 
         // Mint tenderToken for pool + discount these tokens
-        require(tenderToken.mint(address(this), shares), "ERR_TOKEN_NOT_MINTED");
-        mintedForPool += shares;
+        require(tenderToken.mint(address(this), _initial_liquidity), "ERR_TOKEN_NOT_MINTED");
+        mintedForPool += _initial_liquidity;
 
-        pool.init(_initial_liquidity, shares);
+        pool.init(_initial_liquidity, _initial_liquidity);
 
         isPoolActivated = true;
         
@@ -149,12 +158,26 @@ contract Manager {
         // Calculate share price
         uint256 currentSharePrice = sharePrice();
         uint256 shares;
+        uint256 _amount_staked;
 
         if(currentSharePrice == 1e18) {
             shares = _amount;
         } 
         shares = _amount.mul(1e18).div(currentSharePrice);
-            
+
+        //splits funds into reserve and staker 
+        if(isReserveActive) {
+            uint256 _amount_reserved = _amount.mul(liquidityRatioForReserve).div(1e18);
+            _amount_staked = _amount.sub(_amount_reserved);
+
+        } else {
+             _amount_staked = _amount; 
+
+        } 
+
+         
+
+
 
         // Mint tenderToken
         require(tenderToken.mint(msg.sender, shares), "ERR_TOKEN_NOT_MINTED");
@@ -163,7 +186,7 @@ contract Manager {
         require(underlyingToken.transferFrom(msg.sender, address(this), _amount), "ERR_TOKEN_TANSFERFROM");
 
         // Stake deposited amount
-        staker._stake(_amount);
+        staker._stake(_amount_staked);
 
         // Check if we need to do arbitrage if spotprice is at least 10% below shareprice
         // TODO: use proper maths (MathUtils)
@@ -199,22 +222,64 @@ contract Manager {
     }
 
     function withdraw(uint256 _amount) public virtual  {
-        // uint256 owed = _amount.mul(sharePrice()).div(1e18);
+        // amount owed to the user -5% fee
+        uint256 owed = _amount.mul(sharePrice()).div(1e18).mul(95).div(100);
 
+        // checks if manager has enough funds
+        require(underlyingToken.balanceOf(address(this)) >= owed, "NOT_ENOUGH_FUNDS");
+        
         // transferFrom tenderToken
         require(tenderToken.transferFrom(msg.sender, address(this), _amount), "ERR_TENDER_TRANSFERFROM");
-        
-        // swap with balancer
-                
-        (uint256 out) = pool.tenderToToken(_amount);
 
-        // send underlying
-        require(underlyingToken.transfer(msg.sender, out));
+        // transfer underlying token to user
+        underlyingToken.transfer(msg.sender, owed);
+    }
+
+    uint256[] owedFunds;
+
+    // memory arrays CANNOT be dynamic 
+    uint[] myArray; // crud, create, read, update, delete
+
+
+
+    function newCreditor(uint256 _owedToCreditor) public {
+        owedFunds[counter] = _owedToCreditor;
+        counter += 1;
+
+    }
+
+    function getInLine(uint256 _amount) public returns(bool) {
+        // transferFrom tenderToken
+        require(tenderToken.transferFrom(msg.sender, address(this), _amount), "ERR_TENDER_TRANSFERFROM");
+        uint256 owed = _amount.mul(sharePrice()).div(1e18).mul(95).div(100);
+
+        users[msg.sender].balanceOwed = owed;
+        users[msg.sender].positionInLine = counter;
+        counter += 1;
+        return true;
+
+
+
+    }
+
+
+        
+
+
+
+        //         // swap with pool
+        // if(isPoolActivated){
+        //     (uint256 out) = pool.tenderToToken(_amount);
+
+        //     // send underlying
+        //     require(underlyingToken.transfer(msg.sender, out));
+        // } else if(underlyingToken.balanceOf(address(this)) >= owed) {
+        //     underlyingToken.trasfer(msg.sender, owed)
 
         // emit Withdraw(msg.sender, _amount, out);
 
 
-    }
+    
 
     // function _swapInUnderlying(uint256 _tokens) public virtual  returns(bool) {
     //     require(underlyingToken.transferFrom(msg.sender, address(this), _amount), "ERR_TENDER_TRANSFERFROM");

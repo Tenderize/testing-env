@@ -90,6 +90,25 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "in_A_plus_B",
+        "type": "uint256"
+      }
+    ],
+    "name": "get_y",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "tokens",
         "type": "uint256"
       },
@@ -211,6 +230,93 @@
       }
     ],
     "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "input_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "input_reserve",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "output_reserve",
+        "type": "uint256"
+      }
+    ],
+    "name": "priceStableMul",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "input_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "input_reserve",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "output_reserve",
+        "type": "uint256"
+      }
+    ],
+    "name": "priceStableOld",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "input_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "input_reserve",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "output_reserve",
+        "type": "uint256"
+      }
+    ],
+    "name": "priceStableSwap",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
