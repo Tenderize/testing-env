@@ -16,64 +16,6 @@
     "type": "constructor"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "token_amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "token_reserve",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "tender_reserve",
-        "type": "uint256"
-      }
-    ],
-    "name": "amountTenderOut",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tender_amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "tender_reserve",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "token_reserve",
-        "type": "uint256"
-      }
-    ],
-    "name": "amountTokenOut",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "getSpotPrice",
     "outputs": [
@@ -90,25 +32,6 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "in_A_plus_B",
-        "type": "uint256"
-      }
-    ],
-    "name": "get_y",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
         "name": "tokens",
         "type": "uint256"
       },
@@ -119,13 +42,7 @@
       }
     ],
     "name": "init",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -143,25 +60,6 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "liquidity",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "manager",
     "outputs": [
@@ -172,35 +70,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "input_amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "input_reserve",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "output_reserve",
-        "type": "uint256"
-      }
-    ],
-    "name": "price",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -236,106 +105,6 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "input_amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "input_reserve",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "output_reserve",
-        "type": "uint256"
-      }
-    ],
-    "name": "priceStableMul",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "pure",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "input_amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "input_reserve",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "output_reserve",
-        "type": "uint256"
-      }
-    ],
-    "name": "priceStableOld",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "pure",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "input_amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "input_reserve",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "output_reserve",
-        "type": "uint256"
-      }
-    ],
-    "name": "priceStableSwap",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "tenderBalance",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
         "name": "tenders",
         "type": "uint256"
       }
@@ -349,19 +118,6 @@
       }
     ],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "tokenBalance",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -381,19 +137,6 @@
       }
     ],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalLiquidity",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   }
 ]
