@@ -27,7 +27,7 @@ import "./Token/ITenderToken.sol";
 contract Manager {
     using SafeMath for uint256;
 
-   uint256 internal constant ONE = 1e18;
+    uint256 internal constant ONE = 1e18;
     uint256 internal constant MAX = 2**256-1;
     uint256 internal constant MIN = 1; 
 
@@ -40,9 +40,10 @@ contract Manager {
     ITenderToken public tenderToken;
     Staker public staker;
 
-    // Swap
+    // pool
     DEX public pool; 
 
+    // we need to keep track of this to calculate share price correctly
     uint256 public mintedForPool;
 
 
@@ -51,14 +52,23 @@ contract Manager {
     // uint256 public tenderSupply;
     // uint256 public sp;  
 
-    struct user {
-        uint8 positionInLine;
-        uint256 balanceOwed;
-    }
-    
-    uint8 counter;
 
-    mapping (address => user) public users;
+    // creditors count + total amount owed
+    uint256 public nuMcreditors;
+    uint256 public owedTotal;
+
+
+    struct User {
+    address u_address;       
+    uint256 owed;
+    }  
+
+    // array of creditors 
+    User[] public users;
+    
+
+
+
 
     
 
@@ -66,6 +76,7 @@ contract Manager {
 
     // check if AMM pool is initiated
     bool public isPoolActivated;
+
 
     uint256 liquidityRatioForReserve = 1e17;
     bool isReserveActive = true; 
@@ -99,13 +110,59 @@ contract Manager {
     //     return 1e18;
     // }
 
+    // add a new credit to array
+    function addCreditor(address _address, uint256 _amount) public returns (bool) {
+        users.push(User(_address, _amount));
+        nuMcreditors ++;
+        owedTotal += _amount;
+        return true;
+    }  
+    
+
+    // pays out whole input amount to creditors, in order from first, 
+    // TODO we need to pay out sol, based on the changes in arrays
+    // ?? maybe pay out max 3 creditrs??? => otherwise many calls, high costs for who calls the function 
+    function payCreditors(uint256 _amount) public returns (bool) {
+        require(owedTotal >= _amount, "amount greater than owed");
+        for (uint i = 0; i<users.length; i++){ // looping always starts at 0, we could add counter so it start at last position, not sure if it is wanted
+            // checks arrays, skips those with empty values
+            if(users[i].owed != 0) {
+                // check if all amount goes to the next creditor; sends him this ammount
+                if(users[i].owed >= _amount) {
+                    users[i].owed -= _amount; // need to transfer _amount of funds now to user
+                    owedTotal -= _amount;
+                    // removes the user from creditors if his balance is 0
+                    if(users[i].owed == 0){
+                        nuMcreditors -= 1;
+                    }
+                    return true;
+                    // subtracts user's debt from amount and continues to next user
+                } else { 
+                    _amount -= users[i].owed;
+                    owedTotal -= users[i].owed; // need to transfer all owed funds now to user
+                    users[i].owed = 0;
+                    nuMcreditors -= 1;
+                
+                    
+                }
+                    
+                }
+                 
+            }
+
+            
+            
+    }    
+
+
+    // controls if we use reserve or AMM
     function setReserveActive(bool _setState) public returns(bool) {
         isReserveActive = _setState;
         return isReserveActive;
     }
 
 
-
+    // initializes pool => phase 2
     function initPool(uint256 _initial_liquidity) public {
 
         //check if pool isn't active
@@ -139,6 +196,7 @@ contract Manager {
         tenderToken.mint(msg.sender, _amount);
     }
 
+    // calculates how much underlying tokens is one tendertoken worth
     function sharePrice() public view returns (uint256) {
         uint256 tenderSupplyc = tenderToken.totalSupply().sub(mintedForPool);
         uint256 outstandingc = underlyingToken.balanceOf(address(this)).add(underlyingToken.balanceOf(address(staker)));
@@ -242,21 +300,17 @@ contract Manager {
 
 
 
-    function newCreditor(uint256 _owedToCreditor) public {
-        owedFunds[counter] = _owedToCreditor;
-        counter += 1;
 
-    }
-
+    // get user in line to wait for future deposits 
     function getInLine(uint256 _amount) public returns(bool) {
         // transferFrom tenderToken
         require(tenderToken.transferFrom(msg.sender, address(this), _amount), "ERR_TENDER_TRANSFERFROM");
         uint256 owed = _amount.mul(sharePrice()).div(1e18).mul(95).div(100);
 
-        users[msg.sender].balanceOwed = owed;
-        users[msg.sender].positionInLine = counter;
-        counter += 1;
-        return true;
+        // checks creditor was added
+        bool success;
+        success = addCreditor(msg.sender, owed);
+        return success;
 
 
 

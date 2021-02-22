@@ -172,7 +172,7 @@ const main = async () => {
 
   console.log("getInLine")
   await manager.connect(account1).getInLine(ethers.utils.parseEther('200'))
-  console.log(await manager.connect(account1).users(account1.address))
+  
 
 
 
