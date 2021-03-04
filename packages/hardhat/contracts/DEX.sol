@@ -15,15 +15,19 @@ contract DEX {
   uint256 public totalLiquidity;
   mapping (address => uint256) public liquidity;
 
+  uint256 public invariant;
+  uint256 public sub;
+
   constructor(address token_addr, address tender_addr) public {
     token = IERC20(token_addr);
     tender = IERC20(tender_addr);
   }
 
-function init(uint256 tokens, uint256 tenders) public returns (uint256) {
+function init(uint256 tokens, uint256 tenders, uint256 _invariant) public returns (uint256) {
   require(totalLiquidity==0,"DEX:init - already has liquidity");
   totalLiquidity = tokens;
   liquidity[msg.sender] = totalLiquidity;
+  invariant = _invariant; // tokens.mul(tenders).div(1e18);
   require(token.transferFrom(msg.sender, address(this), tokens));
   require(tender.transferFrom(msg.sender, address(this), tenders));
   return totalLiquidity;
@@ -78,10 +82,17 @@ function amountTokenOut(uint256 tender_amount, uint256 tender_reserve, uint256 t
   return numerator / denominator;
   }
 
-  function priceStable(uint256 input_amount, uint256 input_reserve, uint256 output_reserve) public pure returns (uint256) {
+  function priceScaffold(uint256 input_amount, uint256 input_reserve, uint256 output_reserve) public pure returns (uint256) {
   uint256 numerator = input_amount.mul(output_reserve);
   uint256 denominator = input_reserve.add(input_amount);
   uint256 result = numerator / denominator;
+  return result.mul(997).div(1000);
+  }
+
+  function priceConstProdInv(uint256 input_amount, uint256 input_reserve, uint256 output_reserve) public returns (uint256) {
+  uint256 main = output_reserve;
+  uint256 subtractor = invariant.mul(1e18).div(input_reserve.add(input_amount));
+  uint256 result = main.sub(subtractor);
   return result.mul(997).div(1000);
   }
 
@@ -171,7 +182,7 @@ function tenderToToken(uint256 tenders) public returns (uint256) {
   uint256 currentSharePrice = manager.sharePrice();
   uint256 token_reserve = token.balanceOf(address(this));
   uint256 tender_reserve = tender.balanceOf(address(this));
-  uint256 token_bought = priceStable(tenders, tender_reserve, token_reserve);
+  uint256 token_bought = priceConstProdInv(tenders, tender_reserve, token_reserve);
   uint256 norm_tok_bought = token_bought.mul(currentSharePrice).div(1e18);
   require(token.transfer(msg.sender, norm_tok_bought));
   require(tender.transferFrom(msg.sender, address(this), tenders));
@@ -181,12 +192,33 @@ function tokenToTender(uint256 tokens) public returns (uint256) {
   uint256 currentSharePrice = manager.sharePrice();
   uint256 token_reserve = token.balanceOf(address(this));
   uint256 tender_reserve = tender.balanceOf(address(this));
-  uint256 tender_bought = priceStable(tokens, token_reserve, tender_reserve);
+  uint256 tender_bought = priceConstProdInv(tokens, token_reserve, tender_reserve);
   uint256 norm_tender_bought = tender_bought.mul(1e18).div(currentSharePrice);
   tender.transfer(msg.sender, norm_tender_bought);
   require(token.transferFrom(msg.sender, address(this), tokens));
   return norm_tender_bought;
 }
+
+// function tenderToToken(uint256 tenders) public returns (uint256) {
+//   uint256 currentSharePrice = manager.sharePrice();
+//   uint256 token_reserve = token.balanceOf(address(this));
+//   uint256 tender_reserve = tender.balanceOf(address(this));
+//   uint256 token_bought = priceStable(tenders, tender_reserve, token_reserve);
+//   uint256 norm_tok_bought = token_bought.mul(currentSharePrice).div(1e18);
+//   require(token.transfer(msg.sender, norm_tok_bought));
+//   require(tender.transferFrom(msg.sender, address(this), tenders));
+//   return norm_tok_bought;
+// }
+// function tokenToTender(uint256 tokens) public returns (uint256) {
+//   uint256 currentSharePrice = manager.sharePrice();
+//   uint256 token_reserve = token.balanceOf(address(this));
+//   uint256 tender_reserve = tender.balanceOf(address(this));
+//   uint256 tender_bought = priceStable(tokens, token_reserve, tender_reserve);
+//   uint256 norm_tender_bought = tender_bought.mul(1e18).div(currentSharePrice);
+//   tender.transfer(msg.sender, norm_tender_bought);
+//   require(token.transferFrom(msg.sender, address(this), tokens));
+//   return norm_tender_bought;
+// }
 
 // function deposit(uint256 _amount) public payable returns (uint256) {
 //   uint256 _amount;

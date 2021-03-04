@@ -116,6 +116,11 @@
         "internalType": "uint256",
         "name": "tenders",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_invariant",
+        "type": "uint256"
       }
     ],
     "name": "init",
@@ -140,6 +145,19 @@
     "name": "initManager",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "invariant",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -221,7 +239,36 @@
         "type": "uint256"
       }
     ],
-    "name": "priceStable",
+    "name": "priceConstProdInv",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "input_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "input_reserve",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "output_reserve",
+        "type": "uint256"
+      }
+    ],
+    "name": "priceScaffold",
     "outputs": [
       {
         "internalType": "uint256",
@@ -317,6 +364,19 @@
       }
     ],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "sub",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {

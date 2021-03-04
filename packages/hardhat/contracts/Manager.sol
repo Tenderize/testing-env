@@ -141,7 +141,7 @@ contract Manager {
 
 
     // initializes pool => phase 2
-    function initPool(uint256 _initial_liquidity) public {
+    function initPool(uint256 _initial_liquidity, uint256 _invariant) public {
 
         //check if pool isn't active
         require(isPoolActivated == false, "POOL_ALREADY_ACTIVE");
@@ -163,7 +163,7 @@ contract Manager {
         require(tenderToken.mint(address(this), _initial_liquidity), "ERR_TOKEN_NOT_MINTED");
         mintedForPool += _initial_liquidity;
 
-        pool.init(_initial_liquidity, _initial_liquidity);
+        pool.init(_initial_liquidity, _initial_liquidity, _invariant);
 
         isPoolActivated = true;
         
